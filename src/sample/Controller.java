@@ -7,11 +7,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -19,22 +17,19 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import net.sf.jasperreports.engine.JRException;
-import sun.rmi.transport.ObjectTable;
 
-import javax.xml.transform.Result;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static Constants.SQLtypes.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Optional;
 
 public class Controller extends Application {
     private static ConexionMySQL objConexion;
@@ -159,13 +154,13 @@ public class Controller extends Application {
     }
 
     public void clickPiedad(ActionEvent ev){
-        currentTable = "Piedad";
+        currentTable = "piedad";
         currentId = "ID_Nicho";
         callProcedure("{call showPiedad()}");
     }
 
     public void clickBuenPastor(ActionEvent ev){
-        currentTable = "Buen_Pastor";
+        currentTable = "buen_pastor";
         currentId = "ID_Nicho";
         callProcedure("{call showBuenPastor()}");
     }
@@ -457,10 +452,10 @@ public class Controller extends Application {
                 while (lado.next()) {
                     String table;
                     if (lado.getString("Lado").equals("Derecho")) {
-                        table = "Piedad";
+                        table = "piedad";
                     }
                     else {
-                        table = "Buen_Pastor";
+                        table = "buen_pastor";
                     }
                     nichoType = objConexion.consultar("SELECT Tipo_Nicho FROM " + table +" WHERE ID_Cliente=" + clientData.get(0));
                 }
@@ -511,6 +506,7 @@ public class Controller extends Application {
             for(int i=1;i<=14;i++) {
                 t[cont] = alphabet + Integer.toString(i);
                 statusar[cont]=getStatus(t[cont]);
+
                 typear[cont]=getType(t[cont]);
                 cont++;
             }
@@ -519,28 +515,28 @@ public class Controller extends Application {
         for (int r = 0; r < 14; r++) {
             for (int c = 0; c < 14; c++) {
                 int number = 14 * r + c;
-                 button[number] =new Button(t[number]);
-                button[number].getStylesheets().add("Styles.css");
+                button[number] =new Button(t[number]);
+
                 switch (typear[number]){
                     case "Imagen":
                         button[number].getStyleClass().add("buttonbold");
                         break;
 
                 }
-                switch (statusar[number]){
+
+                switch (statusar[number]!=null ? statusar[number] : "Libre") {
                     case "Ocupado":
-                        button[number].getStyleClass().add("buttonused");
-                        break;
-                    case "Libre":
                         button[number].getStyleClass().add("buttonfree");
                         break;
+                    case "Libre":
+                        button[number].getStyleClass().add("buttonused");
+                        break;
                 }
-
                 button[number].setPrefSize(50,50);
-                 gridDisp.add(button[number], c, r);
+                gridDisp.add(button[number], c, r);
                 button[number].setOnAction(event -> checkSpace(event));
             }
-        }
+        };
     }
 
     public void loadStatusBP() {
@@ -568,7 +564,7 @@ public class Controller extends Application {
             for (int c = 0; c < 14; c++) {
                 int number = 14 * r + c;
                 button[number] =new Button(t[number]);
-                button[number].getStylesheets().add("Styles.css");
+
                 switch (typear[number]){
                     case "Imagen":
                         button[number].getStyleClass().add("buttonbold");
@@ -594,7 +590,7 @@ public class Controller extends Application {
     private String getStatus(String id){
 
         try{
-            if(tableinTab.equals("Piedad")) {
+            if(tableinTab.equals("piedad")) {
 
                 ResultSet c = objConexion.consultar("SELECT Estado FROM " + tableinTab + " WHERE ID_Nicho='" + id + "';");
                 while (c.next()) {
@@ -603,7 +599,7 @@ public class Controller extends Application {
 
 
                 }}
-                if (tableinTab.equals("Buen_Pastor")) {
+                if (tableinTab.equals("buen_pastor")) {
 
                     List<String> list = new ArrayList<>();
                     ResultSet c = objConexion.consultar("SELECT estado FROM buen_pastor where id_nicho LIKE '"+id+"__' group by estado having count(*) >= 4;");
@@ -625,16 +621,16 @@ public class Controller extends Application {
 
     private String getType(String id){
         try{
-            if(tableinTab.equals("Piedad")){
+            if(tableinTab.equals("piedad")){
 
-                ResultSet c = objConexion.consultar("SELECT Tipo_Nicho FROM "+tableinTab+" WHERE ID_Nicho='"+id+"';");
+                ResultSet c = objConexion.consultar("SELECT Tipo_Nicho FROM piedad WHERE ID_Nicho='"+id+"';");
                 while (c.next()) {
                     type = c.getString("Tipo_Nicho");
                 }
             }
-            if(tableinTab.equals("Buen_Pastor")){
+            if(tableinTab.equals("buen_pastor")){
 
-                ResultSet c = objConexion.consultar("SELECT Tipo_Nicho FROM "+tableinTab+" WHERE ID_Nicho='"+id+"-1';");
+                ResultSet c = objConexion.consultar("SELECT Tipo_Nicho FROM buen_pastor WHERE ID_Nicho='"+id+"-1';");
                 while (c.next()) {
                     type = c.getString("Tipo_Nicho");
 
