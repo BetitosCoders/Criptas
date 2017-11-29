@@ -1,0 +1,59 @@
+.background{
+    -fx-background-color: #ffffff;
+	-fx-font-family:"Arial";
+}
+//boton normal
+.button{
+	-fx-background-color:#4cb4ff;
+	-fx-text-fill: #FFFFFF;
+}
+.button:hover{
+	
+    -fx-background-color:#378dcc;
+}
+.button:pressed {
+	-fx-background-color:#2273ad;
+}
+//boton agregar
+.buttonadd{
+	-fx-background-color:#6bce6e;
+	-fx-text-fill: #FFFFFF;
+}
+.buttonadd:hover{
+	
+    -fx-background-color:#509b53;
+}
+.botonadd:pressed {
+	-fx-background-color:#328235;
+}
+
+//boton eliminar
+.buttondel{
+	-fx-background-color:#e05035;
+	-fx-text-fill: #FFFFFF;
+}
+.buttondel:hover{
+	
+    -fx-background-color:#d14127;
+}
+.buttondel:pressed {
+	-fx-background-color:#ad2911;
+}
+//boton disponibilidad
+.buttonspaces{
+	//-fx-background-color:#c3d1db;
+	//-fx-text-fill: #FFFFFF;
+}
+.buttonused{
+	-fx-background-color:#509b53	;
+	-fx-text-fill: #FFFFFF;
+}
+.buttonfree{
+	-fx-background-color:#d14127	;
+	-fx-text-fill: #FFFFFF;
+}
+.buttonbold{
+	-fx-font-weight: bold;
+	-fx-text-fill: #dd882c;
+
+}
