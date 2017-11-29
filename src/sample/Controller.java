@@ -1,5 +1,6 @@
 package sample;
 
+import Reports.JavaCallJasperReport;
 import javafx.application.Application;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -21,6 +22,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import net.sf.jasperreports.engine.JRException;
 import sun.rmi.transport.ObjectTable;
 
 import javax.xml.transform.Result;
@@ -647,12 +649,25 @@ public class Controller extends Application {
     }
 
     public void checkTab(){
-//TabPaneD.getSelectionModel().getSelectedIndex();
-        if(tabPiedad.isSelected()) {
-
+        if(TabPaneD.getSelectionModel().getSelectedItem()==tabPiedad) {
+            tableinTab="piedad";
+            loadStatus();
         }
-        if(tabBuen_Pastor.isSelected()){
+        if(TabPaneD.getSelectionModel().getSelectedItem()==tabBuen_Pastor) {
+            tableinTab="buen_pastor";
+            loadStatusBP();
+        }
+    }
 
+    public void showReport(){
+        try {
+            new JavaCallJasperReport();
+        } catch (JRException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }
