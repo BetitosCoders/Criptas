@@ -473,8 +473,9 @@ public class Controller extends Application {
         }
         return null;
     }
-
+//Te manda a la fila en la tabla cuando das a un botón de disponibilidad
     private void checkSpace(ActionEvent ae) {
+        //Obtiene informacion del boton
         Object o = ae.getSource();
         Button b = null;
         SingleSelectionModel<Tab> selectionModel = TabPaneM.getSelectionModel();
@@ -490,34 +491,39 @@ public class Controller extends Application {
 
 
     }
-
+//Crea los botones de piedad en el gridpane
     public void loadStatus() {
         String[] t=new String[200];
         String[] statusar=new String[200];
         String[] typear=new String[200];
         int cont=0;
         Button[] button = new Button[200];
-
+    //Espacio entre los botones
         gridDisp.setPadding(new Insets(5));
         gridDisp.setHgap(5);
         gridDisp.setVgap(5);
-
+    //For para crear el texto de los botones
         for (char alphabet = 'A'; alphabet <= 'N'; alphabet++) {
             for(int i=1;i<=14;i++) {
+                //en este arreglo se guarda el nombre de los botones
                 t[cont] = alphabet + Integer.toString(i);
+                //Obtiene el estado de ese botón
                 statusar[cont]=getStatus(t[cont]);
-
+                //Obtiene el tipo de ese botón
                 typear[cont]=getType(t[cont]);
                 cont++;
             }
         }
-
+    //For para crear los botones
         for (int r = 0; r < 14; r++) {
             for (int c = 0; c < 14; c++) {
+                //Calcula el numero del botón
                 int number = 14 * r + c;
+                //Crea el botón
                 button[number] =new Button(t[number]);
 
                 switch (typear[number]){
+                    //Si es imagen el tipo le añade el estilo buttonbold
                     case "Imagen":
                         button[number].getStyleClass().add("buttonbold");
                         break;
@@ -525,47 +531,57 @@ public class Controller extends Application {
                 }
 
                 switch (statusar[number]!=null ? statusar[number] : "Libre") {
+                    //Si es ocupado el estado usa el estilo buttonfree
                     case "Ocupado":
                         button[number].getStyleClass().add("buttonfree");
                         break;
+                     //Si es libre el estado usa buttonused
                     case "Libre":
                         button[number].getStyleClass().add("buttonused");
                         break;
                 }
+                //define la medida de los botones
                 button[number].setPrefSize(50,50);
+                //añade el botón al grid
                 gridDisp.add(button[number], c, r);
+                //Accion del botón
                 button[number].setOnAction(event -> checkSpace(event));
             }
-        };
+        }
     }
-
+//Crea los botones de buen pastor en el gridpane
     public void loadStatusBP() {
         String[] t=new String[200];
         String[] statusar=new String[200];
         String[] typear=new String[200];
         int cont=0;
         Button[] button = new Button[200];
-
+        //Espacio entre los botones
         gridDisp2.setPadding(new Insets(5));
         gridDisp2.setHgap(5);
         gridDisp2.setVgap(5);
-
+        //For para crear el texto de los botones
         for (char alphabet = 'A'; alphabet <= 'N'; alphabet++) {
             for(int i=1;i<=14;i++) {
+                //en este arreglo se guarda el nombre de los botones
                 t[cont] = alphabet + Integer.toString(i);
+                //Obtiene el estado de ese botón
                 statusar[cont]=getStatus(t[cont]);
-
+                //Obtiene el tipo de ese botón
                 typear[cont]=getType(t[cont]);
                 cont++;
             }
         }
-
+        //For para crear los botones
         for (int r = 0; r < 14; r++) {
             for (int c = 0; c < 14; c++) {
+                //Calcula el numero del botón
                 int number = 14 * r + c;
+                //Crea el botón
                 button[number] =new Button(t[number]);
 
                 switch (typear[number]){
+                    //Si es imagen el tipo le añade el estilo buttonbold
                     case "Imagen":
                         button[number].getStyleClass().add("buttonbold");
                         break;
@@ -573,20 +589,25 @@ public class Controller extends Application {
                 }
 
                 switch (statusar[number]!=null ? statusar[number] : "Libre") {
+                    //Si es ocupado el estado usa el estilo buttonfree
                     case "Ocupado":
                         button[number].getStyleClass().add("buttonfree");
                         break;
+                    //Si es libre el estado usa buttonused
                     case "Libre":
                         button[number].getStyleClass().add("buttonused");
                         break;
                 }
+                //define la medida de los botones
                 button[number].setPrefSize(50,50);
+                //añade el botón al grid
                 gridDisp2.add(button[number], c, r);
+                //Accion del botón
                 button[number].setOnAction(event -> checkSpace(event));
             }
-        };
+        }
     }
-
+//Obtiene el estado del nicho para poder marcarlo ocupado o libre
     private String getStatus(String id){
 
         try{
@@ -618,7 +639,7 @@ public class Controller extends Application {
 
         return status;
     }
-
+//Obtiene el tipo de nicho que es para marcarlo diferente
     private String getType(String id){
         try{
             if(tableinTab.equals("piedad")){
@@ -643,7 +664,7 @@ public class Controller extends Application {
         }
         return type;
     }
-
+//Checa cual pestaña esta seleccionada y carga los botones de disponiblidad
     public void checkTab(){
         if(TabPaneD.getSelectionModel().getSelectedItem()==tabPiedad) {
             tableinTab="piedad";
@@ -654,7 +675,7 @@ public class Controller extends Application {
             loadStatusBP();
         }
     }
-
+//Muestra el reporte segun la tabla cuando le das imprimir
     public void showReport(){
         try {
             new JavaCallJasperReport(currentTable);

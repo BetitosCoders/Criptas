@@ -22,9 +22,10 @@ public class JavaCallJasperReport {
 
 
     public JavaCallJasperReport(String nombre) throws JRException, SQLException, ClassNotFoundException {
+        // Ruta del .jasper
         String reportSrcFile = "src/Reports/"+nombre+".jasper";
 
-        // First, compile jrxml file.
+        // Conexion
         conectarSQL();
         Connection conn = conexion;
 
@@ -57,6 +58,7 @@ public class JavaCallJasperReport {
 //        SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
 
     }
+    //Conexión
     private String conectarSQL() {
         String estado = null;
         objConexion = new ConexionMySQL("root", "devpass9", "Criptas", "localhost", 3306);
