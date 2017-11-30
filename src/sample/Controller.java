@@ -657,7 +657,7 @@ public class Controller extends Application {
 
     public void showReport(){
         try {
-            new JavaCallJasperReport();
+            new JavaCallJasperReport(currentTable);
         } catch (JRException e) {
             e.printStackTrace();
         } catch (SQLException e) {

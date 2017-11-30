@@ -21,12 +21,12 @@ public class JavaCallJasperReport {
 
 
 
-    public JavaCallJasperReport() throws JRException, SQLException, ClassNotFoundException {
-        String reportSrcFile = "C:/report1.jasper";
+    public JavaCallJasperReport(String nombre) throws JRException, SQLException, ClassNotFoundException {
+        String reportSrcFile = "src/Reports/"+nombre+".jasper";
 
         // First, compile jrxml file.
-
-        Connection conn = Conn.getMySQLConnection();
+        conectarSQL();
+        Connection conn = conexion;
 
         // Parameters for report
         Map<String, Object> parameters = new HashMap<String, Object>();
@@ -59,7 +59,7 @@ public class JavaCallJasperReport {
     }
     private String conectarSQL() {
         String estado = null;
-        objConexion = new ConexionMySQL("teccodig_carloss", "devpass9", "teccodig_Criptas", "tec.codigobueno.org", 3306);
+        objConexion = new ConexionMySQL("root", "devpass9", "Criptas", "localhost", 3306);
         try {
             estado = objConexion.conectar();
             conexion = objConexion.getConexion();
