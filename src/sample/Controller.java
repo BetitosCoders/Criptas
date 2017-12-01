@@ -37,6 +37,8 @@ public class Controller extends Application {
     private Connection conexion;
     private ObservableList<ObservableList> data;
     private Stage stage;
+    private int number,nfinal;
+    String[] numb=new String[200];
     private String nombre;
     private String currentTable, currentId;
     private String[] tablesInUse;
@@ -180,6 +182,10 @@ public class Controller extends Application {
 
     }
 
+    public void clickIngresos(ActionEvent ev){
+
+    }
+
     // Esta es la funcion que llama el procedimiento almacenado.
     private void callProcedure(String _procedure) {
         try {
@@ -227,7 +233,7 @@ public class Controller extends Application {
                 // Fijamos el texto utilizando el conjunto de resultados.
                 col.setText(tableRS.getMetaData().getColumnName(i+1));
                 // Cambiamos la anchura por estetica.
-                col.setMinWidth(250);
+                col.setMinWidth(150);
                 // Esto nos permite manipular celdas dentro de la columna que insertamos.
                 col.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
                 // Finalmente agregamos nuestra columna a nuestra tabla.
@@ -474,27 +480,35 @@ public class Controller extends Application {
         return null;
     }
 //Te manda a la fila en la tabla cuando das a un botón de disponibilidad
-    private void checkSpace(ActionEvent ae) {
+    private void checkSpace(ActionEvent ae,int n) {
         //Obtiene informacion del boton
         Object o = ae.getSource();
         Button b = null;
-        SingleSelectionModel<Tab> selectionModel = TabPaneM.getSelectionModel();
+      //  SingleSelectionModel<Tab> selectionModel = TabPaneM.getSelectionModel();
 
 
         if (o instanceof Button)
             b = (Button) o;
 
-        if (b != null)
-
-            selectionModel.select(tabTabla);
-
+        if (b != null) {
+            String btext=b.getText();
+            //TabPaneM.getSelectionModel().select(tabTabla);
+//            for(int i=0;i<19;i++){
+//               if(numb[i].equals(btext)){
+//                   nfinal=Integer.parseInt(numb[i]);
+//               }
+//            }
+            System.out.println(n);
+            tabledata.getSelectionModel().select(0);
+        }
 
 
     }
 //Crea los botones de piedad en el gridpane
     public void loadStatus() {
-        String[] t=new String[200];
+
         String[] statusar=new String[200];
+        String[] t=new String[200];
         String[] typear=new String[200];
         int cont=0;
         Button[] button = new Button[200];
@@ -518,10 +532,11 @@ public class Controller extends Application {
         for (int r = 0; r < 14; r++) {
             for (int c = 0; c < 14; c++) {
                 //Calcula el numero del botón
-                int number = 14 * r + c;
+                 number = 14 * r + c;
                 //Crea el botón
                 button[number] =new Button(t[number]);
-
+                button[number].setOnAction(event -> checkSpace(event,number));
+                numb[number]=t[number];
                 switch (typear[number]){
                     //Si es imagen el tipo le añade el estilo buttonbold
                     case "Imagen":
@@ -545,7 +560,7 @@ public class Controller extends Application {
                 //añade el botón al grid
                 gridDisp.add(button[number], c, r);
                 //Accion del botón
-                button[number].setOnAction(event -> checkSpace(event));
+
             }
         }
     }
@@ -576,10 +591,10 @@ public class Controller extends Application {
         for (int r = 0; r < 14; r++) {
             for (int c = 0; c < 14; c++) {
                 //Calcula el numero del botón
-                int number = 14 * r + c;
+                 number = 14 * r + c;
                 //Crea el botón
                 button[number] =new Button(t[number]);
-
+                button[number].setOnAction(event -> checkSpace(event,number));
                 switch (typear[number]){
                     //Si es imagen el tipo le añade el estilo buttonbold
                     case "Imagen":
@@ -603,7 +618,7 @@ public class Controller extends Application {
                 //añade el botón al grid
                 gridDisp2.add(button[number], c, r);
                 //Accion del botón
-                button[number].setOnAction(event -> checkSpace(event));
+
             }
         }
     }
