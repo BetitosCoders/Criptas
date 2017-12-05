@@ -213,6 +213,26 @@ class AddScreen {
                         switchScene(source);
                         break;
                     }
+                    case "Ingresos": {
+                        String query = "INSERT INTO Ingresos(Descripcion, Monto, Fecha) VALUES(?,?,?)";
+                        if (checkDouble(1)) {
+                            try {
+                                PreparedStatement insert = objConexion.getConexion().prepareStatement(query);
+                                insert.setString(1, entryTxtFields[0].getText());
+                                insert.setDouble(2, Double.parseDouble(entryTxtFields[1].getText()));
+                                insert.setString(3, entryTxtFields[2].getText());
+                                insert.execute();
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                            Node source = (Node) event.getSource();
+                            switchScene(source);
+                            break;
+                        } else {
+                            new Alert(Alert.AlertType.ERROR, "Campo incorrecto.").show();
+                            break;
+                        }
+                    }
                 }
 
             }
@@ -315,7 +335,7 @@ class AddScreen {
 
     private void fillDate() {
         LocalDate localDate = LocalDate.now();
-        String date = DateTimeFormatter.ofPattern("yyy/MM/dd").format(localDate);
+        String date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(localDate);
         entryTxtFields[getFechaIndex()].setText(date);
     }
 

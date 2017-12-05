@@ -416,6 +416,17 @@ public class Controller extends Application {
                     ((Stage) source.getScene().getWindow()).setScene(pagoScreen.makeScene());
                     break;
                 }
+                case "Ingresos": {
+                    // Se fijan campos a insertar y sus nombres a mostrar.
+                    optionalEntries = new String[]{};
+                    requiredEntries = new String[]{"Descripcion", "Monto", "Fecha"};
+                    otherTableEntries = new String[]{};
+                    // Se crea una pantalla para insertar y se muestra dicha pantalla.
+                    AddScreen pagoScreen = new AddScreen(3, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
+                    Node source = (Node) ev.getSource();
+                    ((Stage) source.getScene().getWindow()).setScene(pagoScreen.makeScene());
+                    break;
+                }
             }
         }
     }
