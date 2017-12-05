@@ -13,17 +13,17 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="700.0" prefWidth="1280.0" styleClass="background" stylesheets="@Styles.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<BorderPane prefHeight="700.0" prefWidth="1280.0" styleClass="background" stylesheets="@Styles.css" xmlns="http://javafx.com/javafx/8.0.162-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <right>
       <VBox prefHeight="200.0" prefWidth="150.0" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
-            <Button mnemonicParsing="false" onAction="#addRegister" prefHeight="25.0" prefWidth="200.0" styleClass="buttonadd" text="Agregar" />
-            <Button mnemonicParsing="false" onAction="#modify" prefHeight="25.0" prefWidth="200.0" text="Modificar">
+            <Button fx:id="btnAdd" mnemonicParsing="false" onAction="#addRegister" prefHeight="25.0" prefWidth="200.0" styleClass="buttonadd" text="Agregar" />
+            <Button fx:id="btnMod" mnemonicParsing="false" onAction="#modify" prefHeight="25.0" prefWidth="200.0" text="Modificar">
                <VBox.margin>
                   <Insets />
                </VBox.margin>
             </Button>
-            <Button mnemonicParsing="false" onAction="#deleteRegister" prefHeight="25.0" prefWidth="200.0" styleClass="buttondel" text="Eliminar" />
+            <Button fx:id="btnDel" mnemonicParsing="false" onAction="#deleteRegister" prefHeight="25.0" prefWidth="200.0" styleClass="buttondel" text="Eliminar" />
             <Button layoutX="20.0" layoutY="55.0" mnemonicParsing="false" onAction="#showReport" prefHeight="25.0" prefWidth="200.0" text="Imprimir" />
          </children>
          <BorderPane.margin>

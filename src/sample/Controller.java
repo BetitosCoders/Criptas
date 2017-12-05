@@ -57,7 +57,7 @@ public class Controller extends Application {
     @FXML
     BorderPane borderMain;
     @FXML
-    Button btnClientes, btnPiedad, btnPastor, btnPagos, btnDocumentos;
+    Button btnClientes, btnPiedad, btnPastor, btnPagos, btnDocumentos, btnAdd, btnMod, btnDel;
     @FXML
     Button A1, A2;
     @FXML
@@ -162,40 +162,61 @@ public class Controller extends Application {
     /* Para llamar el procedimiento almacenado, se utiliza una funcion al cual se le manda
     * el nombre del procedimiento almacenado. */
     public void clickClientes() {
+        btnAdd.setDisable(false);
+        btnMod.setDisable(false);
+        btnDel.setDisable(false);
         currentTable = "Clientes";
         currentId = "ID_Cliente";
         callProcedure("{call showClients()}");
     }
 
     public void clickPiedad() {
+        btnAdd.setDisable(true);
+        btnMod.setDisable(true);
+        btnDel.setDisable(true);
         currentTable = "piedad";
         currentId = "ID_Nicho";
         callProcedure("{call showPiedad()}");
     }
 
     public void clickBuenPastor() {
+        btnAdd.setDisable(true);
+        btnMod.setDisable(true);
+        btnDel.setDisable(true);
         currentTable = "buen_pastor";
         currentId = "ID_Nicho";
         callProcedure("{call showBuenPastor()}");
     }
 
     public void clickPagos() {
+        btnAdd.setDisable(false);
+        btnMod.setDisable(false);
+        btnDel.setDisable(false);
         currentTable = "Pagos";
         currentId = "ID_Pago";
         callProcedure("{call showPagos()}");
     }
 
     public void clickDocumentos() {
+        btnAdd.setDisable(false);
+        btnMod.setDisable(false);
+        btnDel.setDisable(false);
         currentTable = "Documentos";
         callProcedure("{call showDocs()}");
     }
 
     public void clickGastos() {
+        btnAdd.setDisable(false);
+        btnMod.setDisable(false);
+        btnDel.setDisable(false);
         currentTable = "Gastos";
         callProcedure("{call showGastos()}");
     }
 
     public void clickIngresos() {
+        btnAdd.setDisable(false);
+        btnMod.setDisable(false);
+        btnDel.setDisable(false);
         currentTable = "Ingresos";
         callProcedure("{call showIngresos()}");
     }
