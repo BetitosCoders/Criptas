@@ -68,7 +68,6 @@ public class Controller extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.stage = primaryStage;
-        clientData = FXCollections.observableArrayList();
     }
 
     // La utlilizamos para pasar del login a la vista principal.
@@ -76,6 +75,7 @@ public class Controller extends Application {
         String estado = conectarSQL();
         System.out.println(estado);
         Parent root = null;
+        clientData = FXCollections.observableArrayList();
         // Checha que no este vacio ningun campo.
         if (txtUser.getText() != null && txtPass.getText() != null) {
             // Compara el usuario y la password con las credenciales en la base de datos.
@@ -717,6 +717,52 @@ public class Controller extends Application {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void getClientInfoTable() {
+        switch (currentTable) {
+            case "Clientes" : {
+                String queryClients = "SELECT * FROM Clientes WHERE ID_Cliente=" + getID();
+                ResultSet clients = objConexion.consultar(queryClients);
+                clientData.clear();
+                try {
+                    while (clients.next()) {
+                        clientData.add(clients.getString("Nombre"));
+                        clientData.add(clients.getString("AP_Paterno"));
+                        clientData.add(clients.getString("AP_Materno"));
+                        clientData.add(clients.getString("ID_Nicho"));
+                        clientData.add(clients.getString("Lado"));
+                        clientData.add(clients.getString("Saldo"));
+                        clientData.add(clients.getString("Dirección"));
+                        clientData.add(clients.getString("Teléfono"));
+                        clientData.add(clients.getString("Fecha_Ins"));
+                        clientData.add(clients.getString("Ben1"));
+                        clientData.add(clients.getString("Ben1_Par"));
+                        clientData.add(clients.getString("Ben2"));
+                        clientData.add(clients.getString("Ben2_Par"));
+                        clientData.add(clients.getString("Lim_Credito"));
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                String lado;
+                if (clientData.get(4).equals("Derecho"))
+                    lado = "Piedad";
+                else
+                    lado = "Buen_Pastor";
+                String queryDif = "SELECT * FROM " + lado + " WHERE ID_Nicho='" + clientData.get(3) + "'";
+                ResultSet dif = objConexion.consultar(queryDif);
+                try {
+                    while(dif.next()) {
+                        clientData.add(dif.getString("Nombre_Dif"));
+                        clientData.add(dif.getString("AP_Pat_Dif"));
+                        clientData.add(dif.getString("AP_Mat_Dif"));
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
