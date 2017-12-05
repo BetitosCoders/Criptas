@@ -75,7 +75,7 @@ public class ModScreen {
             vBoxes[i].setPadding(new Insets(0, 10, 0, 10));
             vBoxes[i].getChildren().add(entryLbls[i]);
             vBoxes[i].getChildren().add(entryTxtFields[i]);
-            if (currentTable.equals("Pagos") && !cmbAdded){
+            if ((currentTable.equals("Pagos") || currentTable.equals("Documentos")) && !cmbAdded){
                 hBoxes[k].getChildren().add(cmbVbox);
                 j++;
                 cmbAdded = true;
@@ -84,11 +84,10 @@ public class ModScreen {
                 hBoxes[k].getChildren().add(vBoxes[i]);
                 j++;
             } else {
-                k++;
                 hBoxes[k].getChildren().add(vBoxes[i]);
                 j = 0;
+                k++;
             }
-            hBoxes[k].setAlignment(Pos.BOTTOM_CENTER);
         }
     }
 
@@ -153,16 +152,20 @@ public class ModScreen {
                         }
                     }
                     case "Pagos": {
-                        String queryPago = "UPDATE Pagos SET Cantidad=?, Fecha=?, ID_Nicho=?, Tipo_Nicho=?, ID_Cliente=?";
+                        String queryPago = "UPDATE Pagos SET Cantidad=?, Fecha=?, ID_Nicho=?, Tipo_Nicho=?, ID_Cliente=? WHERE ID_Pago=?";
                         try {
-                            PreparedStatement insert = objConexion.getConexion().prepareStatement(queryPago);
+                            PreparedStatement update = objConexion.getConexion().prepareStatement(queryPago);
                             for(int i=0;i<entryTxtFields.length;i++){
-                                insert.setString(i+1, entryTxtFields[i].getText());
+                                update.setString(i+1, entryTxtFields[i].getText());
                             }
                             String idClient = cmbClients.getSelectionModel().getSelectedItem().toString();
-                            insert.setString(5, idClient);
-                            insert.execute();
+                            String[] idClientSep = idClient.split(":");
+                            idClient = idClientSep[0];
+                            update.setString(5, idClient);
+                            update.setString(6, ID);
+                            update.execute();
                         } catch (SQLException e) {
+                            new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
                             e.printStackTrace();
                         }
                         Node source = (Node) event.getSource();
@@ -170,9 +173,58 @@ public class ModScreen {
                         break;
                     }
                     case "Gastos": {
+                        String queryGasto="UPDATE Gastos SET Descripción=?, Monto=?, Fecha=? WHERE ID_Gasto=?";
+                        try {
+                            PreparedStatement update = objConexion.getConexion().prepareStatement(queryGasto);
+                            for(int i=0;i<entryTxtFields.length;i++){
+                                update.setString(i+1, entryTxtFields[i].getText());
+                            }
+                            update.setString(4, ID);
+                            update.execute();
+                        } catch (SQLException e) {
+                            new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
+                            e.printStackTrace();
+                        }
+                        Node source = (Node) event.getSource();
+                        switchScene(source);
                         break;
                     }
                     case "Documentos": {
+                        String queryGasto="UPDATE Documentos SET Tipo=?, Fecha=?, ID_Cliente=? WHERE ID_Documentos=?";
+                        try {
+                            PreparedStatement update = objConexion.getConexion().prepareStatement(queryGasto);
+                            for(int i=0;i<entryTxtFields.length;i++){
+                                update.setString(i+1, entryTxtFields[i].getText());
+                            }
+                            String idClient = cmbClients.getSelectionModel().getSelectedItem().toString();
+                            String[] idClientSep = idClient.split(":");
+                            idClient = idClientSep[0];
+                            update.setString(3, idClient);
+                            update.setString(4, ID);
+                            update.execute();
+                        } catch (SQLException e) {
+                            new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
+                            e.printStackTrace();
+                        }
+                        Node source = (Node) event.getSource();
+                        switchScene(source);
+                        break;
+                    }
+                    case "Ingresos":{
+                        String queryGasto="UPDATE Ingresos SET Descripción=?, Monto=?, Fecha=? WHERE ID_Ingreso=?";
+                        try {
+                            PreparedStatement update = objConexion.getConexion().prepareStatement(queryGasto);
+                            for(int i=0;i<entryTxtFields.length;i++){
+                                update.setString(i+1, entryTxtFields[i].getText());
+                            }
+                            update.setString(4, ID);
+                            update.execute();
+                        } catch (SQLException e) {
+                            new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
+                            e.printStackTrace();
+                        }
+                        Node source = (Node) event.getSource();
+                        switchScene(source);
                         break;
                     }
                 }
@@ -265,7 +317,7 @@ public class ModScreen {
     private boolean checkForEmptyTxt() {
         for(int i=0;i<entryLbls.length;i++){
             if(entryLbls[i].getText().matches(".*\\*$")){
-                String x=entryTxtFields[2].getText();
+                String x=entryTxtFields[i].getText();
                 if(x == null || x.isEmpty()){
                     return true;
                 }
@@ -325,7 +377,12 @@ public class ModScreen {
     }
 
     private void fillClientsCombo() {
-        for (int i = 4;i<clientData.size();i++) {
+        int k;
+        if (currentTable.equals("Pagos"))
+            k=4;
+        else
+            k=2;
+        for (int i = k;i<clientData.size();i++) {
             cmbClients.getItems().add(clientData.get(i));
         }
         for(int j = 0;j<cmbClients.getItems().size();j++){
@@ -348,7 +405,7 @@ public class ModScreen {
             fillTextBoxes();
             positionScroll();
         }
-        else if (currentTable.equals("Pagos")) {
+        else if (currentTable.equals("Pagos") || currentTable.equals("Documentos")) {
             fillClientsCombo();
             generateEntryTxtFields();
             setLabelText();

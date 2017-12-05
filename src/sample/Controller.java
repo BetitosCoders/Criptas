@@ -796,6 +796,72 @@ public class Controller extends Application {
                 }
                 break;
             }
+            case "Gastos":{
+                String queryGastos="SELECT * FROM Gastos WHERE ID_Gasto=" + getID();
+                ResultSet gastos=objConexion.consultar(queryGastos);
+                clientData.clear();
+                try {
+                    while (gastos.next()){
+                        clientData.add(gastos.getString("Descripción"));
+                        clientData.add(gastos.getString("Monto"));
+                        clientData.add(gastos.getString("Fecha"));
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+            case "Ingresos":{
+                String queryGastos="SELECT * FROM Ingresos WHERE ID_Ingreso=" + getID();
+                ResultSet gastos=objConexion.consultar(queryGastos);
+                clientData.clear();
+                try {
+                    while (gastos.next()){
+                        clientData.add(gastos.getString("Descripción"));
+                        clientData.add(gastos.getString("Monto"));
+                        clientData.add(gastos.getString("Fecha"));
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+            case "Documentos":{
+                String queryDocs = "SELECT * FROM Documentos WHERE ID_Documentos=" + getID();
+                ResultSet Docs = objConexion.consultar(queryDocs);
+                clientData.clear();
+                String idClient = null;
+                try {
+                    while (Docs.next()) {
+                        idClient = Docs.getString("ID_Cliente");
+                        clientData.add(Docs.getString("Tipo"));
+                        clientData.add(Docs.getString("Fecha"));
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                String queryClients = "SELECT ID_Cliente, Nombre, AP_Paterno, AP_Materno FROM Clientes";
+                ResultSet clients=objConexion.consultar(queryClients);
+                try {
+                    while (clients.next()) {
+                        if (clients.getString("ID_Cliente").equals(idClient)) {
+                            clientData.add(clients.getString("ID_Cliente") + ": " +
+                                    clients.getString("Nombre") + " " +
+                                    clients.getString("AP_Paterno") + " " +
+                                    clients.getString("AP_Materno") + "*");
+                        }
+                        else {
+                            clientData.add(clients.getString("ID_Cliente") + ": " +
+                                    clients.getString("Nombre") + " " +
+                                    clients.getString("AP_Paterno") + " " +
+                                    clients.getString("AP_Materno"));
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
         }
     }
 
@@ -825,10 +891,34 @@ public class Controller extends Application {
                     break;
                 }
                 case "Documentos": {
+                    getClientInfoTable();
+                    optionalEntries = new String[]{};
+                    requiredEntries = new String[]{"Tipo", "Fecha"};
+                    otherTableEntries = new String[]{};
+                    ModScreen modify = new ModScreen(requiredEntries, optionalEntries, otherTableEntries, 2, currentTable, objConexion, getID() + "");
+                    Node source = (Node) ev.getSource();
+                    ((Stage) source.getScene().getWindow()).setScene(modify.makeScene());
                     break;
                 }
                 case "Gastos": {
-
+                    getClientInfoTable();
+                    optionalEntries = new String[]{};
+                    requiredEntries = new String[]{"Descripción", "Monto", "Fecha"};
+                    otherTableEntries = new String[]{};
+                    ModScreen modify = new ModScreen(requiredEntries, optionalEntries, otherTableEntries, 3, currentTable, objConexion, getID() + "");
+                    Node source = (Node) ev.getSource();
+                    ((Stage) source.getScene().getWindow()).setScene(modify.makeScene());
+                    break;
+                }
+                case "Ingresos": {
+                    getClientInfoTable();
+                    optionalEntries = new String[]{};
+                    requiredEntries = new String[]{"Descripción", "Monto", "Fecha"};
+                    otherTableEntries = new String[]{};
+                    ModScreen modify = new ModScreen(requiredEntries, optionalEntries, otherTableEntries, 3, currentTable, objConexion, getID() + "");
+                    Node source = (Node) ev.getSource();
+                    ((Stage) source.getScene().getWindow()).setScene(modify.makeScene());
+                    break;
                 }
             }
         }
