@@ -7,16 +7,14 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import javax.xml.soap.Text;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,7 +37,9 @@ public class ModScreen {
     private Button btnCancel = new Button();
     private String currentTable;
     private String ID;
-    private ConexionMySQL objConexion;
+    private static ConexionMySQL objConexion;
+    ComboBox cmbClients = new ComboBox();
+    VBox cmbVbox = new VBox();
 
     ModScreen(String[] requiredEntryNames, String[] optionalEntryNames, String[] otherTableEntries, int entries, String currentTable, ConexionMySQL objConexion, String ID) {
         this.requiredEntryNames = requiredEntryNames;
@@ -47,7 +47,7 @@ public class ModScreen {
         this.otherTableEntries = otherTableEntries;
         this.entries = entries;
         this.currentTable = currentTable;
-        this.objConexion = objConexion;
+        ModScreen.objConexion = objConexion;
         this.ID = ID;
     }
 
@@ -66,6 +66,7 @@ public class ModScreen {
         VBox[] vBoxes = new VBox[hboxCount * 3];
         int k = 0;
         int j = 0;
+        boolean cmbAdded = false;
         for (int i = 0; i < entries; i++) {
             entryTxtFields[i] = new javafx.scene.control.TextField();
             entryLbls[i] = new javafx.scene.control.Label();
@@ -74,6 +75,11 @@ public class ModScreen {
             vBoxes[i].setPadding(new Insets(0, 10, 0, 10));
             vBoxes[i].getChildren().add(entryLbls[i]);
             vBoxes[i].getChildren().add(entryTxtFields[i]);
+            if (currentTable.equals("Pagos") && !cmbAdded){
+                hBoxes[k].getChildren().add(cmbVbox);
+                j++;
+                cmbAdded = true;
+            }
             if (j != 2) {
                 hBoxes[k].getChildren().add(vBoxes[i]);
                 j++;
@@ -82,6 +88,7 @@ public class ModScreen {
                 hBoxes[k].getChildren().add(vBoxes[i]);
                 j = 0;
             }
+            hBoxes[k].setAlignment(Pos.BOTTOM_CENTER);
         }
     }
 
@@ -146,6 +153,20 @@ public class ModScreen {
                         }
                     }
                     case "Pagos": {
+                        String queryPago = "UPDATE Pagos SET Cantidad=?, Fecha=?, ID_Nicho=?, Tipo_Nicho=?, ID_Cliente=?";
+                        try {
+                            PreparedStatement insert = objConexion.getConexion().prepareStatement(queryPago);
+                            for(int i=0;i<entryTxtFields.length;i++){
+                                insert.setString(i+1, entryTxtFields[i].getText());
+                            }
+                            String idClient = cmbClients.getSelectionModel().getSelectedItem().toString();
+                            insert.setString(5, idClient);
+                            insert.execute();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        Node source = (Node) event.getSource();
+                        switchScene(source);
                         break;
                     }
                     case "Gastos": {
@@ -242,17 +263,12 @@ public class ModScreen {
     }
 
     private boolean checkForEmptyTxt() {
-        int i;
-        for (i = 0; i < requiredEntryNames.length; i++) {
-            String x = entryTxtFields[i].getText();
-            if (x.isEmpty()) {
-                return true;
-            }
-        }
-        for (i = i+optionalEntryNames.length; i < (requiredEntryNames.length + optionalEntryNames.length) + otherTableEntries.length; i++) {
-            String x = entryTxtFields[i].getText();
-            if (x.isEmpty()) {
-                return true;
+        for(int i=0;i<entryLbls.length;i++){
+            if(entryLbls[i].getText().matches(".*\\*$")){
+                String x=entryTxtFields[2].getText();
+                if(x == null || x.isEmpty()){
+                    return true;
+                }
             }
         }
         return false;
@@ -308,6 +324,21 @@ public class ModScreen {
         }
     }
 
+    private void fillClientsCombo() {
+        for (int i = 4;i<clientData.size();i++) {
+            cmbClients.getItems().add(clientData.get(i));
+        }
+        for(int j = 0;j<cmbClients.getItems().size();j++){
+            if (cmbClients.getItems().get(j).toString().matches(".*\\*$")) {
+                cmbClients.getSelectionModel().select(j);
+                break;
+            }
+        }
+        Label cmbLabel = new Label("Clientes");
+        cmbVbox.getChildren().add(cmbLabel);
+        cmbVbox.getChildren().add(cmbClients);
+    }
+
     Scene makeScene() {
         if (currentTable.equals("Clientes") || currentTable.equals("Gastos") || currentTable.equals("Ingresos")) {
             generateEntryTxtFields();
@@ -318,7 +349,13 @@ public class ModScreen {
             positionScroll();
         }
         else if (currentTable.equals("Pagos")) {
-
+            fillClientsCombo();
+            generateEntryTxtFields();
+            setLabelText();
+            positionEntries();
+            generateButtons();
+            fillTextBoxes();
+            positionScroll();
         }
         return new Scene(borderPane, 1280, 700);
     }

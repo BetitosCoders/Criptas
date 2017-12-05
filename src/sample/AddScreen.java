@@ -345,15 +345,12 @@ class AddScreen {
     }
 
     private boolean checkForEmptyTxt() {
-        int i;
-        for (i = 0; i < requiredEntryNames.length; i++) {
-            if (entryTxtFields[i].getText().isEmpty()) {
-                return true;
-            }
-        }
-        for (i = i+optionalEntryNames.length; i < (requiredEntryNames.length + optionalEntryNames.length) + otherTableEntries.length; i++) {
-            if (entryTxtFields[i].getText().isEmpty()) {
-                return true;
+        for(int i=0;i<entryLbls.length;i++){
+            if(entryLbls[i].getText().matches(".*\\*$")){
+                String x=entryTxtFields[2].getText();
+                if(x == null || x.isEmpty()){
+                    return true;
+                }
             }
         }
         return false;

@@ -322,12 +322,6 @@ public class Controller extends Application {
         selection = selection.replace('[',' ').trim();
         String splitSelection[] = selection.split(",");
         return Integer.parseInt(splitSelection[0]);
-//        ObservableList<TablePosition> selectedCells = tabledata.getSelectionModel().getSelectedCells();
-//        TablePosition selectedCell = selectedCells.get(0);
-//        TableColumn desiredColumn = selectedCell.getTableColumn();
-//        int rowIndex = selectedCell.getRow();
-//        Object ID = desiredColumn.getCellObservableValue(rowIndex).getValue();
-//        return Integer.parseInt();
     }
 
     // Funcion para agregar un registro.
@@ -762,6 +756,45 @@ public class Controller extends Application {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
+                break;
+            }
+            case "Pagos" : {
+                String queryPagos = "SELECT * FROM Pagos WHERE ID_Pago=" + getID();
+                ResultSet pagos = objConexion.consultar(queryPagos);
+                clientData.clear();
+                String idClient = null;
+                try {
+                    while (pagos.next()) {
+                        idClient = pagos.getString("ID_Cliente");
+                        clientData.add(pagos.getString("Cantidad"));
+                        clientData.add(pagos.getString("Fecha"));
+                        clientData.add(pagos.getString("ID_Nicho"));
+                        clientData.add(pagos.getString("Tipo_Nicho"));
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                String queryClients = "SELECT ID_Cliente, Nombre, AP_Paterno, AP_Materno FROM Clientes";
+                ResultSet clients=objConexion.consultar(queryClients);
+                try {
+                    while (clients.next()) {
+                        if (clients.getString("ID_Cliente").equals(idClient)) {
+                            clientData.add(clients.getString("ID_Cliente") + ": " +
+                                    clients.getString("Nombre") + " " +
+                                    clients.getString("AP_Paterno") + " " +
+                                    clients.getString("AP_Materno") + "*");
+                        }
+                        else {
+                            clientData.add(clients.getString("ID_Cliente") + ": " +
+                                    clients.getString("Nombre") + " " +
+                                    clients.getString("AP_Paterno") + " " +
+                                    clients.getString("AP_Materno"));
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
             }
         }
     }
@@ -782,7 +815,14 @@ public class Controller extends Application {
                     break;
                 }
                 case "Pagos": {
-
+                    getClientInfoTable();
+                    optionalEntries = new String[]{};
+                    requiredEntries = new String[]{"Cantidad", "Fecha", "Nicho", "Tipo de Nicho"};
+                    otherTableEntries = new String[]{};
+                    ModScreen modify = new ModScreen(requiredEntries, optionalEntries, otherTableEntries, 4, currentTable, objConexion, getID() + "");
+                    Node source = (Node) ev.getSource();
+                    ((Stage) source.getScene().getWindow()).setScene(modify.makeScene());
+                    break;
                 }
                 case "Documentos": {
                     break;
