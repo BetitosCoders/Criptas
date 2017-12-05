@@ -1,6 +1,5 @@
 package sample;
 
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -22,39 +21,39 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static sample.Controller.clientData;
 
-class AddScreen {
-    private VBox vBox1 = new VBox();
-    private BorderPane borderPane = new BorderPane();
-    private HBox[] hBoxes;
+public class ModScreen {
+    private String[] requiredEntryNames, optionalEntryNames, otherTableEntries;
+    private TextField[] entryTxtFields;
+    private Label[] entryLbls;
     private int entries;
     private int hboxCount;
     private int idCliente;
-    private ConexionMySQL objConexion;
-    private String currentTable;
-    private String[] optionalEntryNames, requiredEntryNames, otherTableEntries;
-    private TextField[] entryTxtFields;
-    private Label[] entryLbls = null;
+    private VBox vBox1 = new VBox();
+    private BorderPane borderPane = new BorderPane();
+    private HBox[] hBoxes;
     private Button btnAccept = new Button();
     private Button btnCancel = new Button();
+    private String currentTable;
+    private String ID;
+    private ConexionMySQL objConexion;
 
-    AddScreen(int _entries, String[] _optionalEntryNames, String[] _requiredEntryNames, String _currentTable, ConexionMySQL _objConexion, String[] _otherTableEntries) {
-        this.entries = _entries;
-        this.optionalEntryNames = _optionalEntryNames;
-        this.requiredEntryNames = _requiredEntryNames;
-        this.currentTable = _currentTable;
-        this.objConexion = _objConexion;
-        this.otherTableEntries = _otherTableEntries;
+    ModScreen(String[] requiredEntryNames, String[] optionalEntryNames, String[] otherTableEntries, int entries, String currentTable, ConexionMySQL objConexion, String ID) {
+        this.requiredEntryNames = requiredEntryNames;
+        this.optionalEntryNames = optionalEntryNames;
+        this.otherTableEntries = otherTableEntries;
+        this.entries = entries;
+        this.currentTable = currentTable;
+        this.objConexion = objConexion;
+        this.ID = ID;
     }
 
     private void generateEntryTxtFields() {
-        entryTxtFields = new TextField[entries];
-        entryLbls = new Label[entries];
+        entryTxtFields = new javafx.scene.control.TextField[entries];
+        entryLbls = new javafx.scene.control.Label[entries];
         if (entries % 3 == 0) {
             hboxCount = (entries / 3) + 2;
         } else {
@@ -68,8 +67,8 @@ class AddScreen {
         int k = 0;
         int j = 0;
         for (int i = 0; i < entries; i++) {
-            entryTxtFields[i] = new TextField();
-            entryLbls[i] = new Label();
+            entryTxtFields[i] = new javafx.scene.control.TextField();
+            entryLbls[i] = new javafx.scene.control.Label();
             entryTxtFields[i].setPrefSize(300, 20);
             vBoxes[i] = new VBox();
             vBoxes[i].setPadding(new Insets(0, 10, 0, 10));
@@ -112,7 +111,7 @@ class AddScreen {
     private void generateButtons() {
         HBox buttonsH = new HBox();
         btnAccept.setPrefSize(150, 20);
-        btnAccept.setText("Agregar");
+        btnAccept.setText("Acceptar");
         btnAccept.addEventHandler(ActionEvent.ACTION, event -> {
             if (checkForEmptyTxt())
                 new Alert(Alert.AlertType.ERROR, "No fueron ingresados todos los datos necesarios.").show();
@@ -125,13 +124,14 @@ class AddScreen {
                             new Alert(Alert.AlertType.ERROR, "El lado es incorrecto.").show();
                             break;
                         } else {
-                            String queryIns = "INSERT INTO Clientes(Nombre,AP_Paterno,AP_Materno,ID_Nicho,Lado,Saldo,Dirección,Teléfono,Fecha_Ins,Ben1,Ben1_Par,Ben2,Ben2_Par,Lim_Credito)" +
-                                    " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                            String queryIns = "UPDATE CLientes SET Nombre=?,AP_Paterno=?,AP_Materno=?,ID_Nicho=?," +
+                                    "Lado=?,Saldo=?,Dirección=?,Teléfono=?,Fecha_Ins=?,Ben1=?,Ben1_Par=?," +
+                                    "Ben2=?,Ben2_Par=?,Lim_Credito=? WHERE ID_Cliente=?";
                             idCliente = getLastClientID();
                             String queryUpdate = "UPDATE " + entryTxtFields[ladoIndex].getText() + " SET ID_Cliente=?, Estado='Ocupado', Nombre_Dif=?, AP_Pat_Dif=?, AP_Mat_Dif=? WHERE ID_Nicho=?";
                             try {
-                                PreparedStatement insert = fillInsertStatementClientes(queryIns);
-                                PreparedStatement update = fillUpdateStatementClientes(queryUpdate);
+                                PreparedStatement insert = fillUpdate1StatementClientes(queryIns);
+                                PreparedStatement update = fillUpdate2StatementClientes(queryUpdate);
                                 insert.execute();
                                 update.setString(5, idNicho);
                                 update.execute();
@@ -146,71 +146,12 @@ class AddScreen {
                         }
                     }
                     case "Pagos": {
-                        List<String> clientInfo = clientData;
-                        if (clientInfo != null) {
-                            if (checkDouble(0)) {
-                                String clientID = clientInfo.get(0);
-                                String nichoID = clientInfo.get(2);
-                                String nichoType = clientInfo.get(3);
-                                String query = "INSERT INTO Pagos(ID_Cliente, Tipo_Nicho, Fecha, Cantidad, ID_Nicho) VALUES(?,?,?,?,?)";
-                                try {
-                                    PreparedStatement insert = objConexion.getConexion().prepareStatement(query);
-                                    insert.setString(1, clientID);
-                                    insert.setString(2, nichoType);
-                                    insert.setString(3, entryTxtFields[1].getText());
-                                    insert.setDouble(4, Double.parseDouble(entryTxtFields[0].getText()));
-                                    insert.setString(5, nichoID);
-                                    insert.execute();
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
-                                }
-                                Node source = (Node) event.getSource();
-                                switchScene(source);
-                                break;
-                            } else {
-                                new Alert(Alert.AlertType.ERROR, "Campo incorrecto.").show();
-                                break;
-                            }
-                        }
                         break;
                     }
                     case "Gastos": {
-                        String query = "INSERT INTO Gastos(Descripcion, Monto, Fecha) VALUES(?,?,?)";
-                        if (checkDouble(1)) {
-                            try {
-                                PreparedStatement insert = objConexion.getConexion().prepareStatement(query);
-                                insert.setString(1, entryTxtFields[0].getText());
-                                insert.setDouble(2, Double.parseDouble(entryTxtFields[1].getText()));
-                                insert.setString(3, entryTxtFields[2].getText());
-                                insert.execute();
-                            } catch (SQLException e) {
-                                e.printStackTrace();
-                            }
-                            Node source = (Node) event.getSource();
-                            switchScene(source);
-                            break;
-                        } else {
-                            new Alert(Alert.AlertType.ERROR, "Campo incorrecto.").show();
-                            break;
-                        }
+                        break;
                     }
                     case "Documentos": {
-                        List<String> clientInfo = clientData;
-                        String clientID = clientInfo.get(0);
-                        String docPath = Controller.docPath;
-                        String query = "INSERT INTO Documentos(ID_Cliente, Tipo, Fecha, Ruta) VALUES(?,?,?,?)";
-                        try {
-                            PreparedStatement insert = objConexion.getConexion().prepareStatement(query);
-                            insert.setString(1, clientID);
-                            insert.setString(2, entryTxtFields[0].getText());
-                            insert.setString(3, entryTxtFields[1].getText());
-                            insert.setString(4, docPath);
-                            insert.execute();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                        Node source = (Node) event.getSource();
-                        switchScene(source);
                         break;
                     }
                 }
@@ -229,7 +170,7 @@ class AddScreen {
         vBox1.getChildren().add(buttonsH);
     }
 
-    private PreparedStatement fillInsertStatementClientes(String _query) {
+    private PreparedStatement fillUpdate1StatementClientes(String _query) {
         try {
             PreparedStatement insert = objConexion.getConexion().prepareStatement(_query);
             for (int i = 0; i < 14; i++) {
@@ -244,6 +185,7 @@ class AddScreen {
                     insert.setString(i + 1, entryTxtFields[i].getText());
                 }
             }
+            insert.setString(15, ID);
             return insert;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -251,7 +193,7 @@ class AddScreen {
         }
     }
 
-    private PreparedStatement fillUpdateStatementClientes(String _query) {
+    private PreparedStatement fillUpdate2StatementClientes(String _query) {
         try {
             PreparedStatement update = objConexion.getConexion().prepareStatement(_query);
             update.setInt(1, idCliente);
@@ -286,6 +228,43 @@ class AddScreen {
         }
     }
 
+    private void switchScene(Node source) {
+        Parent parent = null;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
+            parent = loader.load();
+            (source.getScene().getWindow()).setWidth(1280);
+            (source.getScene().getWindow()).setHeight(700);
+            ((Stage) source.getScene().getWindow()).setScene(new Scene(parent, 1280, 700));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean checkForEmptyTxt() {
+        int i;
+        for (i = 0; i < requiredEntryNames.length; i++) {
+            String x = entryTxtFields[i].getText();
+            if (x.isEmpty()) {
+                return true;
+            }
+        }
+        for (i = i+optionalEntryNames.length; i < (requiredEntryNames.length + optionalEntryNames.length) + otherTableEntries.length; i++) {
+            String x = entryTxtFields[i].getText();
+            if (x.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void positionScroll() {
+        borderPane.setCenter(vBox1);
+        borderPane.setPadding(new Insets(10, 0, 10, 10));
+        vBox1.setAlignment(Pos.CENTER);
+        VBox.setVgrow(vBox1, Priority.ALWAYS);
+    }
+
     private int getLadoIndex() {
         for (int i = 0; i < entryLbls.length; i++) {
             if (entryLbls[i].getText().equals("Lado*")) {
@@ -304,19 +283,17 @@ class AddScreen {
         return null;
     }
 
-    private int getFechaIndex() {
-        for (int i = 0; i < entryLbls.length; i++) {
-            if (entryLbls[i].getText().equals("Fecha*") || entryLbls[i].getText().equals("Fecha de Inscripcion*")) {
-                return i;
+    private void fillTextBoxes() {
+        List<String> clientInfo = clientData;
+        int i;
+        for (i = 0; i < requiredEntryNames.length + optionalEntryNames.length; i++) {
+            entryTxtFields[i].setText(clientInfo.get(i));
+        }
+        if (otherTableEntries.length > 0) {
+            for (; (i-(requiredEntryNames.length+optionalEntryNames.length)) < otherTableEntries.length; i++) {
+                entryTxtFields[i].setText(clientInfo.get(i));
             }
         }
-        return 0;
-    }
-
-    private void fillDate() {
-        LocalDate localDate = LocalDate.now();
-        String date = DateTimeFormatter.ofPattern("yyy/MM/dd").format(localDate);
-        entryTxtFields[getFechaIndex()].setText(date);
     }
 
     private boolean checkLado(int _ladoIndex) {
@@ -331,48 +308,18 @@ class AddScreen {
         }
     }
 
-    private void switchScene(Node source) {
-        Parent parent = null;
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
-            parent = loader.load();
-            (source.getScene().getWindow()).setWidth(1280);
-            (source.getScene().getWindow()).setHeight(700);
-            ((Stage) source.getScene().getWindow()).setScene(new Scene(parent, 1280, 700));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private boolean checkForEmptyTxt() {
-        int i;
-        for (i = 0; i < requiredEntryNames.length; i++) {
-            if (entryTxtFields[i].getText().isEmpty()) {
-                return true;
-            }
-        }
-        for (i = i+optionalEntryNames.length; i < (requiredEntryNames.length + optionalEntryNames.length) + otherTableEntries.length; i++) {
-            if (entryTxtFields[i].getText().isEmpty()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void positionScroll() {
-        borderPane.setCenter(vBox1);
-        borderPane.setPadding(new Insets(10, 0, 10, 10));
-        vBox1.setAlignment(Pos.CENTER);
-        VBox.setVgrow(vBox1, Priority.ALWAYS);
-    }
-
     Scene makeScene() {
-        generateEntryTxtFields();
-        setLabelText();
-        positionEntries();
-        fillDate();
-        generateButtons();
-        positionScroll();
+        if (currentTable.equals("Clientes") || currentTable.equals("Gastos") || currentTable.equals("Ingresos")) {
+            generateEntryTxtFields();
+            setLabelText();
+            positionEntries();
+            generateButtons();
+            fillTextBoxes();
+            positionScroll();
+        }
+        else if (currentTable.equals("Pagos")) {
+
+        }
         return new Scene(borderPane, 1280, 700);
     }
 }

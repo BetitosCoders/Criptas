@@ -18,7 +18,7 @@
       <VBox prefHeight="200.0" prefWidth="150.0" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
             <Button mnemonicParsing="false" onAction="#addRegister" prefHeight="25.0" prefWidth="200.0" styleClass="buttonadd" text="Agregar" />
-            <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="200.0" text="Modificar">
+            <Button mnemonicParsing="false" onAction="#modify" prefHeight="25.0" prefWidth="200.0" text="Modificar">
                <VBox.margin>
                   <Insets />
                </VBox.margin>

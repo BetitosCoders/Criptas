@@ -68,6 +68,7 @@ public class Controller extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.stage = primaryStage;
+        clientData = FXCollections.observableArrayList();
     }
 
     // La utlilizamos para pasar del login a la vista principal.
@@ -317,12 +318,16 @@ public class Controller extends Application {
 
     // Se obtiene el identificador de cierto registro para poder borrar.
     private int getID() {
-        ObservableList<TablePosition> selectedCells = tabledata.getSelectionModel().getSelectedCells();
-        TablePosition selectedCell = selectedCells.get(0);
-        TableColumn desiredColumn = selectedCell.getTableColumn();
-        int rowIndex = selectedCell.getRow();
-        Object ID = desiredColumn.getCellObservableValue(rowIndex).getValue();
-        return Integer.parseInt(String.valueOf(ID));
+        String selection = tabledata.getSelectionModel().getSelectedItems().get(0).toString();
+        selection = selection.replace('[',' ').trim();
+        String splitSelection[] = selection.split(",");
+        return Integer.parseInt(splitSelection[0]);
+//        ObservableList<TablePosition> selectedCells = tabledata.getSelectionModel().getSelectedCells();
+//        TablePosition selectedCell = selectedCells.get(0);
+//        TableColumn desiredColumn = selectedCell.getTableColumn();
+//        int rowIndex = selectedCell.getRow();
+//        Object ID = desiredColumn.getCellObservableValue(rowIndex).getValue();
+//        return Integer.parseInt();
     }
 
     // Funcion para agregar un registro.
@@ -349,15 +354,15 @@ public class Controller extends Application {
                 }
                 case "Pagos": {
                     // Se utiliza una funcion declarada mas adelante para obtener el cliente que va a pagar.
-                    List<String> clientIDyNombre = getClientName();
+                    List<String> clientIDyNombre = getClientInfoCombo();
                     // Se revisa que se eligio un cliente.
                     if (clientIDyNombre != null) {
                         // Se fijan campos a insertar y sus nombres a mostrar.
                         optionalEntries = new String[]{};
-                        requiredEntries = new String[]{"Cantidad"};
+                        requiredEntries = new String[]{"Cantidad", "Fecha"};
                         otherTableEntries = new String[]{};
                         // Se crea una pantalla para insertar y se muestra dicha pantalla.
-                        AddScreen pagoScreen = new AddScreen(1, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
+                        AddScreen pagoScreen = new AddScreen(2, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
                         Node source = (Node) ev.getSource();
                         ((Stage) source.getScene().getWindow()).setScene(pagoScreen.makeScene());
                         break;
@@ -368,7 +373,7 @@ public class Controller extends Application {
                 }
                 case "Documentos": {
                     // Se utiliza una funcion declarada mas adelante para obtener el cliente que va a pagar.
-                    List<String> clientIDyNombre = getClientName();
+                    List<String> clientIDyNombre = getClientInfoCombo();
                     /* Se le muestra una pantalla al usuario para que elija el documento que quiere guardar.
                     * La pantalla solo permite elegir archivos pdf o imagenes. */
                     FileChooser docChoose = new FileChooser();
@@ -395,10 +400,10 @@ public class Controller extends Application {
                     if (clientIDyNombre != null) {
                         // Se fijan campos a insertar y sus nombres a mostrar.
                         optionalEntries = new String[]{};
-                        requiredEntries = new String[]{"Tipo"};
+                        requiredEntries = new String[]{"Tipo", "Fecha"};
                         otherTableEntries = new String[]{};
                         // Se crea una pantalla para insertar y se muestra dicha pantalla.
-                        AddScreen pagoScreen = new AddScreen(1, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
+                        AddScreen pagoScreen = new AddScreen(2, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
                         ((Stage) source.getScene().getWindow()).setScene(pagoScreen.makeScene());
                         break;
                     } else {
@@ -409,10 +414,10 @@ public class Controller extends Application {
                 case "Gastos": {
                     // Se fijan campos a insertar y sus nombres a mostrar.
                     optionalEntries = new String[]{};
-                    requiredEntries = new String[]{"Descripcion", "Monto"};
+                    requiredEntries = new String[]{"Descripcion", "Monto", "Fecha"};
                     otherTableEntries = new String[]{};
                     // Se crea una pantalla para insertar y se muestra dicha pantalla.
-                    AddScreen pagoScreen = new AddScreen(2, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
+                    AddScreen pagoScreen = new AddScreen(3, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
                     Node source = (Node) ev.getSource();
                     ((Stage) source.getScene().getWindow()).setScene(pagoScreen.makeScene());
                     break;
@@ -422,13 +427,13 @@ public class Controller extends Application {
     }
 
     // Esta funcion genera una ventana para que el usuario seleccione un cliente.
-    private static List<String> getClientName() {
+    private static List<String> getClientInfoCombo() {
         // Obtenemos todos los clientes en la base de datos.
         ResultSet clients = objConexion.consultar("SELECT ID_Cliente, Nombre, ID_Nicho FROM Clientes ORDER BY Nombre");
         // Se hace una lista para almacenar a las opciones posibles.
         List<String> comboChoices = new ArrayList<>();
         // Este variable almacena la informacion del cliente seleccionado.
-        clientData = new ArrayList<>();
+        clientData.clear();
         // Este variable nos ayudara a fijar un cliente predeterminado.
         String firstChoice = null;
         int i = 0;
@@ -514,6 +519,7 @@ public class Controller extends Application {
 
         }
     }
+
     //Crea los botones de piedad en el gridpane
     public void loadStatus() {
         String[] statusar=new String[200];
@@ -711,6 +717,38 @@ public class Controller extends Application {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void modify(ActionEvent ev){
+        String[] optionalEntries;
+        String[] requiredEntries, otherTableEntries;
+        if (isSelected()) {
+            switch (currentTable) {
+                case "Clientes": {
+                    getClientInfoTable();
+                    optionalEntries = new String[]{"Beneficicario 2", "Parentesco de Beneficiario 2", "Limite de Credito"};
+                    requiredEntries = new String[]{"Nombre", "Apellido Paterno", "Apellido Materno", "Nicho", "Lado", "Saldo", "Dirección", "Telefono", "Fecha de Inscripcion", "Benficiario 1", "Parentesco de Beneficiario 1"};
+                    otherTableEntries = new String[] {"Nombre del Difunto", "Apellido Paterno del Difunto", "Apellido Materno del Difunto"};
+                    ModScreen modify = new ModScreen(requiredEntries, optionalEntries, otherTableEntries, 17, currentTable, objConexion, getID() + "");
+                    Node source = (Node) ev.getSource();
+                    ((Stage) source.getScene().getWindow()).setScene(modify.makeScene());
+                    break;
+                }
+                case "Pagos": {
+
+                }
+                case "Documentos": {
+                    break;
+                }
+                case "Gastos": {
+
+                }
+            }
+        }
+        else {
+            resultado = new Alert(Alert.AlertType.INFORMATION, "Eliga el registro a modificar.");
+            resultado.show();
         }
     }
 }

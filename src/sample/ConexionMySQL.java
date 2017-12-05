@@ -48,12 +48,10 @@ public class ConexionMySQL {
     }
 
     java.sql.ResultSet consultar(String query) {
-        java.sql.ResultSet resultado = null;
+        java.sql.ResultSet resultado;
         try {
             java.sql.Statement st = conexion.createStatement();
             resultado = st.executeQuery(query);
-
-
         } catch (SQLException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
@@ -61,6 +59,7 @@ public class ConexionMySQL {
             alert.setContentText(e.getMessage());
             alert.showAndWait();
             System.out.println("Error: " + e.getMessage());
+            resultado = null;
         }
         return resultado;
     }
