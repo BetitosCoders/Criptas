@@ -79,7 +79,7 @@
          <tabs>
             <Tab fx:id="tabDisponibilidad" onSelectionChanged="#checkTab" text="Disponibilidad">
                <content>
-                  <TabPane fx:id="TabPaneD" side="BOTTOM" styleClass="fondo" tabClosingPolicy="UNAVAILABLE">
+                  <TabPane fx:id="tabPaneD" side="BOTTOM" styleClass="fondo" tabClosingPolicy="UNAVAILABLE">
                      <tabs>
                         <Tab fx:id="tabBuen_Pastor" onSelectionChanged="#checkTab" text="Buen Pastor">
                            <content>

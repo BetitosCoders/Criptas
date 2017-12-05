@@ -20,7 +20,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import net.sf.jasperreports.engine.JRException;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,25 +36,34 @@ public class Controller extends Application {
     private Connection conexion;
     private ObservableList<ObservableList> data;
     private Stage stage;
-    private int number,nfinal;
-    String[] numb=new String[200];
+    private Scene scene;
+    private int number;
+    private String[] numb = new String[196];
+    private int cont;
+    private String[] t = new String[200];
     private String nombre;
     private String currentTable, currentId;
-    private String[] tablesInUse;
-    private String tableinTab,status,type;
+    private String tableinTab, status, type;
     static List<String> clientData;
     static String docPath = null;
-    @FXML TableView tabledata;
-    @FXML Tab tabPiedad,tabBuen_Pastor,tabDisponibilidad,tabTabla;
-    @FXML TextField txtUser;
-    @FXML private TextField txtPass;
-    @FXML BorderPane borderMain;
-    @FXML Button btnClientes,btnPiedad,btnPastor,btnPagos,btnDocumentos;
-    @FXML Button A1,A2;
     @FXML
-    GridPane gridDisp,gridDisp2;
+    TableView tabledata;
     @FXML
-    private TabPane TabPaneM,TabPaneD;
+    Tab tabPiedad, tabBuen_Pastor, tabDisponibilidad, tabTabla;
+    @FXML
+    TextField txtUser;
+    @FXML
+    private TextField txtPass;
+    @FXML
+    BorderPane borderMain;
+    @FXML
+    Button btnClientes, btnPiedad, btnPastor, btnPagos, btnDocumentos;
+    @FXML
+    Button A1, A2;
+    @FXML
+    GridPane gridDisp, gridDisp2;
+    @FXML
+    private TabPane tabPaneM, tabPaneD;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -63,18 +71,19 @@ public class Controller extends Application {
     }
 
     // La utlilizamos para pasar del login a la vista principal.
-    public void login(ActionEvent ev){
+    public void login(ActionEvent ev) {
         String estado = conectarSQL();
         System.out.println(estado);
-        Parent root =null;
+        Parent root = null;
         // Checha que no este vacio ningun campo.
         if (txtUser.getText() != null && txtPass.getText() != null) {
             // Compara el usuario y la password con las credenciales en la base de datos.
             if (userCheck(txtUser.getText(), txtPass.getText())) {
-                    Node source = (Node) ev.getSource();
-                    switchScene("sample.fxml", source);
-            }
-            else {
+                Node source = (Node) ev.getSource();
+                switchScene("sample.fxml", source);
+
+
+            } else {
                 resultado = new Alert(Alert.AlertType.ERROR, "Nombre de usuario o contraseña equivoacada.");
                 resultado.show();
             }
@@ -88,7 +97,9 @@ public class Controller extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneName));
             parent = loader.load();
-            ((Stage)source.getScene().getWindow()).setScene(new Scene(parent, 1280, 700));
+            scene=new Scene(parent,1280,700);
+            ((Stage) source.getScene().getWindow()).setScene(scene);
+            scene.getWindow().centerOnScreen();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -149,41 +160,43 @@ public class Controller extends Application {
     la llave primaria para usar  al momento de eliminar. */
     /* Para llamar el procedimiento almacenado, se utiliza una funcion al cual se le manda
     * el nombre del procedimiento almacenado. */
-    public void clickClientes(ActionEvent ev){
+    public void clickClientes() {
         currentTable = "Clientes";
         currentId = "ID_Cliente";
         callProcedure("{call showClients()}");
     }
 
-    public void clickPiedad(ActionEvent ev){
+    public void clickPiedad() {
         currentTable = "piedad";
         currentId = "ID_Nicho";
         callProcedure("{call showPiedad()}");
     }
 
-    public void clickBuenPastor(ActionEvent ev){
+    public void clickBuenPastor() {
         currentTable = "buen_pastor";
         currentId = "ID_Nicho";
         callProcedure("{call showBuenPastor()}");
     }
 
-    public void clickPagos(ActionEvent ev){
+    public void clickPagos() {
         currentTable = "Pagos";
         currentId = "ID_Pago";
         callProcedure("{call showPagos()}");
     }
 
-    public void clickDocumentos(ActionEvent ev){
+    public void clickDocumentos() {
         currentTable = "Documentos";
         callProcedure("{call showDocs()}");
     }
 
-    public void clickGastos(ActionEvent ev){
-
+    public void clickGastos() {
+        currentTable = "Gastos";
+        callProcedure("{call showGastos()}");
     }
 
-    public void clickIngresos(ActionEvent ev){
-
+    public void clickIngresos() {
+        currentTable = "Ingresos";
+        callProcedure("{call showIngresos()}");
     }
 
     // Esta es la funcion que llama el procedimiento almacenado.
@@ -204,7 +217,7 @@ public class Controller extends Application {
 
     /* Cargamos la tabla con su respectivas columnas
      * y registros dependiendo del boton seleccionado. */
-    private void loadTable(ResultSet _tableRS){
+    private void loadTable(ResultSet _tableRS) {
         // Aclaramos toda la tabla en caso de uso previo.
         tabledata.getItems().clear();
         tabledata.getColumns().clear();
@@ -223,7 +236,7 @@ public class Controller extends Application {
         try {
             // Recibe un conjunto de resultados de alguna consultado previamente ejecutada.
             // El for corre por cada columna que tiene el conjunto de resultados recibido.
-            for(int i=0 ; i<tableRS.getMetaData().getColumnCount(); i++){
+            for (int i = 0; i < tableRS.getMetaData().getColumnCount(); i++) {
                 // La i nos sirve para obtener los valores dentro del conjunto de resultados.
                 /* Al momento de Fijar las columnas dentro de la tabla nos pide que el indicador sea
                  * final por lo cual creamos a j */
@@ -231,7 +244,7 @@ public class Controller extends Application {
                 // Creamos nueva columna
                 TableColumn col = new TableColumn();
                 // Fijamos el texto utilizando el conjunto de resultados.
-                col.setText(tableRS.getMetaData().getColumnName(i+1));
+                col.setText(tableRS.getMetaData().getColumnName(i + 1));
                 // Cambiamos la anchura por estetica.
                 col.setMinWidth(150);
                 // Esto nos permite manipular celdas dentro de la columna que insertamos.
@@ -247,27 +260,27 @@ public class Controller extends Application {
 
     // Esta funcion almacena los registros dentro de la base de datos en una lista.
     private void addList(ResultSet tableRS) {
-            try {
-                // Utilizamos el conjunto de resultados que recibimos.
-                while(tableRS.next()){
+        try {
+            // Utilizamos el conjunto de resultados que recibimos.
+            while (tableRS.next()) {
                     /* Se crea una lista para poder juntar todas las columnas
                     * de una fila en un solo registro. */
-                    ObservableList<String> row = FXCollections.observableArrayList();
-                    for(int i=1 ; i<=tableRS.getMetaData().getColumnCount(); i++){
-                        if(tableRS.getString(i)!=null){
-                            row.add(tableRS.getString(i));
-                        }else{
-                            row.add("");
-                        }
+                ObservableList<String> row = FXCollections.observableArrayList();
+                for (int i = 1; i <= tableRS.getMetaData().getColumnCount(); i++) {
+                    if (tableRS.getString(i) != null) {
+                        row.add(tableRS.getString(i));
+                    } else {
+                        row.add("");
                     }
-                    // Agregamos el registro ya compuesto a nuestro arreglo de registros.
-                    data.add(row);
                 }
-            } catch (SQLException e) {
-                resultado = new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage());
-                resultado.show();
+                // Agregamos el registro ya compuesto a nuestro arreglo de registros.
+                data.add(row);
             }
+        } catch (SQLException e) {
+            resultado = new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage());
+            resultado.show();
         }
+    }
 
     // Revisamos si esta seleccionado algun dato en la tabla.
     private boolean isSelected() {
@@ -286,8 +299,7 @@ public class Controller extends Application {
                 resultado = new Alert(Alert.AlertType.INFORMATION, queryRes);
                 resultado.show();
             }
-        }
-        else {
+        } else {
             resultado = new Alert(Alert.AlertType.INFORMATION, "Eliga el registro a eliminar.");
             resultado.show();
         }
@@ -328,7 +340,7 @@ public class Controller extends Application {
                     // Se fijan campos a insertar y sus nombres a mostrar.
                     optionalEntries = new String[]{"Beneficicario 2", "Parentesco de Beneficiario 2", "Limite de Credito"};
                     requiredEntries = new String[]{"Nombre", "Apellido Paterno", "Apellido Materno", "Nicho", "Lado", "Saldo", "Dirección", "Telefono", "Fecha de Inscripcion", "Benficiario 1", "Parentesco de Beneficiario 1"};
-                    otherTableEntries = new String[] {"Nombre del Difunto", "Apellido Paterno del Difunto", "Apellido Materno del Difunto"};
+                    otherTableEntries = new String[]{"Nombre del Difunto", "Apellido Paterno del Difunto", "Apellido Materno del Difunto"};
                     // Se crea una pantalla para insertar y se muestra dicha pantalla.
                     AddScreen clienteScreen = new AddScreen(17, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
                     Node source = (Node) ev.getSource();
@@ -349,8 +361,7 @@ public class Controller extends Application {
                         Node source = (Node) ev.getSource();
                         ((Stage) source.getScene().getWindow()).setScene(pagoScreen.makeScene());
                         break;
-                    }
-                    else {
+                    } else {
                         new Alert(Alert.AlertType.ERROR, "No se eligio ningun cliente.").show();
                         break;
                     }
@@ -390,8 +401,7 @@ public class Controller extends Application {
                         AddScreen pagoScreen = new AddScreen(1, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
                         ((Stage) source.getScene().getWindow()).setScene(pagoScreen.makeScene());
                         break;
-                    }
-                    else {
+                    } else {
                         new Alert(Alert.AlertType.ERROR, "No se eligio ningun cliente.").show();
                         break;
                     }
@@ -430,7 +440,7 @@ public class Controller extends Application {
                 String name = clients.getString("Nombre");
                 String idNicho = clients.getString("ID_Nicho");
                 // Si es el primer cliente, se fija como predeterminado.
-                if( i == 0) {
+                if (i == 0) {
                     firstChoice = idClient + ": " + name + ": " + idNicho;
                     i++;
                 }
@@ -459,11 +469,10 @@ public class Controller extends Application {
                     String table;
                     if (lado.getString("Lado").equals("Derecho")) {
                         table = "piedad";
-                    }
-                    else {
+                    } else {
                         table = "buen_pastor";
                     }
-                    nichoType = objConexion.consultar("SELECT Tipo_Nicho FROM " + table +" WHERE ID_Cliente=" + clientData.get(0));
+                    nichoType = objConexion.consultar("SELECT Tipo_Nicho FROM " + table + " WHERE ID_Cliente=" + clientData.get(0));
                 }
                 // Se utiliza una consulta para saber que tipo de nicho esta utilizando el cliente.
                 if (nichoType != null) {
@@ -479,34 +488,34 @@ public class Controller extends Application {
         }
         return null;
     }
-//Te manda a la fila en la tabla cuando das a un botón de disponibilidad
-    private void checkSpace(ActionEvent ae,int n) {
+
+    //Te manda a la fila en la tabla cuando das a un botón de disponibilidad
+    private void checkSpace(ActionEvent ae, int n) {
         //Obtiene informacion del boton
         Object o = ae.getSource();
         Button b = null;
-      //  SingleSelectionModel<Tab> selectionModel = TabPaneM.getSelectionModel();
-
-
-        if (o instanceof Button)
-            b = (Button) o;
-
+        if (o instanceof Button) b = (Button) o;
         if (b != null) {
-            String btext=b.getText();
+            String btext = b.getText();
             //TabPaneM.getSelectionModel().select(tabTabla);
-//            for(int i=0;i<19;i++){
-//               if(numb[i].equals(btext)){
-//                   nfinal=Integer.parseInt(numb[i]);
-//               }
-//            }
-            System.out.println(n);
-            tabledata.getSelectionModel().select(0);
+            for (int i = 0; i<numb.length; i++) {
+            if(numb[i].equals(btext)) {
+                if(tableinTab.equals("Piedad")) {
+                    clickPiedad();
+                }else{
+                    clickBuenPastor();
+                }
+                tabledata.getSelectionModel().select(i);
+                tabPaneM.getSelectionModel().select(tabTabla);
+                tabledata.scrollTo(i);
+
+            } }
+
+
         }
-
-
     }
-//Crea los botones de piedad en el gridpane
+    //Crea los botones de piedad en el gridpane
     public void loadStatus() {
-
         String[] statusar=new String[200];
         String[] t=new String[200];
         String[] typear=new String[200];
@@ -535,7 +544,6 @@ public class Controller extends Application {
                  number = 14 * r + c;
                 //Crea el botón
                 button[number] =new Button(t[number]);
-                button[number].setOnAction(event -> checkSpace(event,number));
                 numb[number]=t[number];
                 switch (typear[number]){
                     //Si es imagen el tipo le añade el estilo buttonbold
@@ -557,6 +565,7 @@ public class Controller extends Application {
                 }
                 //define la medida de los botones
                 button[number].setPrefSize(50,50);
+                button[number].setOnAction(event -> checkSpace(event,number));
                 //añade el botón al grid
                 gridDisp.add(button[number], c, r);
                 //Accion del botón
@@ -564,12 +573,12 @@ public class Controller extends Application {
             }
         }
     }
-//Crea los botones de buen pastor en el gridpane
+    //Crea los botones de buen pastor en el gridpane
     public void loadStatusBP() {
-        String[] t=new String[200];
+
         String[] statusar=new String[200];
         String[] typear=new String[200];
-        int cont=0;
+        cont=0;
         Button[] button = new Button[200];
         //Espacio entre los botones
         gridDisp2.setPadding(new Insets(5));
@@ -594,7 +603,7 @@ public class Controller extends Application {
                  number = 14 * r + c;
                 //Crea el botón
                 button[number] =new Button(t[number]);
-                button[number].setOnAction(event -> checkSpace(event,number));
+                numb[number]=t[number];
                 switch (typear[number]){
                     //Si es imagen el tipo le añade el estilo buttonbold
                     case "Imagen":
@@ -615,6 +624,8 @@ public class Controller extends Application {
                 }
                 //define la medida de los botones
                 button[number].setPrefSize(50,50);
+                button[number].setOnAction(event -> checkSpace(event,number));
+
                 //añade el botón al grid
                 gridDisp2.add(button[number], c, r);
                 //Accion del botón
@@ -622,7 +633,7 @@ public class Controller extends Application {
             }
         }
     }
-//Obtiene el estado del nicho para poder marcarlo ocupado o libre
+    //Obtiene el estado del nicho para poder marcarlo ocupado o libre
     private String getStatus(String id){
 
         try{
@@ -654,7 +665,7 @@ public class Controller extends Application {
 
         return status;
     }
-//Obtiene el tipo de nicho que es para marcarlo diferente
+    //Obtiene el tipo de nicho que es para marcarlo diferente
     private String getType(String id){
         try{
             if(tableinTab.equals("piedad")){
@@ -679,18 +690,18 @@ public class Controller extends Application {
         }
         return type;
     }
-//Checa cual pestaña esta seleccionada y carga los botones de disponiblidad
+    //Checa cual pestaña esta seleccionada y carga los botones de disponiblidad
     public void checkTab(){
-        if(TabPaneD.getSelectionModel().getSelectedItem()==tabPiedad) {
+        if(tabPaneD.getSelectionModel().getSelectedItem()==tabPiedad) {
             tableinTab="piedad";
             loadStatus();
         }
-        if(TabPaneD.getSelectionModel().getSelectedItem()==tabBuen_Pastor) {
+        if(tabPaneD.getSelectionModel().getSelectedItem()==tabBuen_Pastor) {
             tableinTab="buen_pastor";
             loadStatusBP();
         }
     }
-//Muestra el reporte segun la tabla cuando le das imprimir
+    //Muestra el reporte segun la tabla cuando le das imprimir
     public void showReport(){
         try {
             new JavaCallJasperReport(currentTable);

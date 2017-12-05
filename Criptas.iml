@@ -7,8 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="JasperReports" level="project" />
     <orderEntry type="library" name="mysql-connector-java-5.1.42-bin" level="project" />
-    <orderEntry type="library" name="jasperreports-6.4.3" level="project" />
+    <orderEntry type="library" name="Librerias" level="project" />
   </component>
 </module>
