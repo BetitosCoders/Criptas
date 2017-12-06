@@ -57,7 +57,7 @@ public class Controller extends Application {
     @FXML
     BorderPane borderMain;
     @FXML
-    Button btnClientes, btnPiedad, btnPastor, btnPagos, btnDocumentos, btnAdd, btnMod, btnDel;
+    Button btnClientes, btnPiedad, btnPastor, btnPagos, btnDocumentos, btnAdd, btnMod, btnDel,btnImp;
     @FXML
     Button A1, A2;
     @FXML
@@ -165,6 +165,8 @@ public class Controller extends Application {
         btnAdd.setDisable(false);
         btnMod.setDisable(false);
         btnDel.setDisable(false);
+        btnImp.setDisable(false);
+        tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "Clientes";
         currentId = "ID_Cliente";
         callProcedure("{call showClients()}");
@@ -174,6 +176,8 @@ public class Controller extends Application {
         btnAdd.setDisable(true);
         btnMod.setDisable(true);
         btnDel.setDisable(true);
+        btnImp.setDisable(false);
+        tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "piedad";
         currentId = "ID_Nicho";
         callProcedure("{call showPiedad()}");
@@ -183,6 +187,8 @@ public class Controller extends Application {
         btnAdd.setDisable(true);
         btnMod.setDisable(true);
         btnDel.setDisable(true);
+        btnImp.setDisable(false);
+        tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "buen_pastor";
         currentId = "ID_Nicho";
         callProcedure("{call showBuenPastor()}");
@@ -192,6 +198,8 @@ public class Controller extends Application {
         btnAdd.setDisable(false);
         btnMod.setDisable(false);
         btnDel.setDisable(false);
+        btnImp.setDisable(false);
+        tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "Pagos";
         currentId = "ID_Pago";
         callProcedure("{call showPagos()}");
@@ -201,6 +209,8 @@ public class Controller extends Application {
         btnAdd.setDisable(false);
         btnMod.setDisable(false);
         btnDel.setDisable(false);
+        btnImp.setDisable(false);
+        tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "Documentos";
         callProcedure("{call showDocs()}");
     }
@@ -209,6 +219,8 @@ public class Controller extends Application {
         btnAdd.setDisable(false);
         btnMod.setDisable(false);
         btnDel.setDisable(false);
+        btnImp.setDisable(false);
+        tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "Gastos";
         callProcedure("{call showGastos()}");
     }
@@ -217,6 +229,8 @@ public class Controller extends Application {
         btnAdd.setDisable(false);
         btnMod.setDisable(false);
         btnDel.setDisable(false);
+        btnImp.setDisable(false);
+        tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "Ingresos";
         callProcedure("{call showIngresos()}");
     }
@@ -529,18 +543,27 @@ public class Controller extends Application {
         if (b != null) {
             String btext = b.getText();
             //TabPaneM.getSelectionModel().select(tabTabla);
+            int x=0;
             for (int i = 0; i<numb.length; i++) {
             if(numb[i].equals(btext)) {
-                if(tableinTab.equals("Piedad")) {
-                    clickPiedad();
-                }else{
-                    clickBuenPastor();
-                }
-                tabledata.getSelectionModel().select(i);
-                tabPaneM.getSelectionModel().select(tabTabla);
-                tabledata.scrollTo(i);
 
-            } }
+                if(tabPaneD.getSelectionModel().isSelected(1)) {
+                    clickPiedad();
+                    tabledata.getSelectionModel().select(i);
+                    tabPaneM.getSelectionModel().select(tabTabla);
+                    tabledata.scrollTo(i);
+                }
+
+                    x = (i * 4);
+
+                if(tabPaneD.getSelectionModel().isSelected(0)) {
+                    clickBuenPastor();
+                    tabledata.getSelectionModel().select(x);
+                    tabPaneM.getSelectionModel().select(tabTabla);
+                    tabledata.scrollTo(x);
+
+
+                }}}
 
 
         }
@@ -736,6 +759,7 @@ public class Controller extends Application {
     //Muestra el reporte segun la tabla cuando le das imprimir
     public void showReport(){
         try {
+            System.out.println(currentTable);
             new JavaCallJasperReport(currentTable);
         } catch (JRException e) {
             e.printStackTrace();

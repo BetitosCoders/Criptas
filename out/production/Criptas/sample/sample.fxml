@@ -17,14 +17,14 @@
    <right>
       <VBox prefHeight="200.0" prefWidth="150.0" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
-            <Button mnemonicParsing="false" onAction="#addRegister" prefHeight="25.0" prefWidth="200.0" styleClass="buttonadd" text="Agregar" />
-            <Button mnemonicParsing="false" onAction="#modify" prefHeight="25.0" prefWidth="200.0" text="Modificar">
+            <Button fx:id="btnAdd" disable="true" mnemonicParsing="false" onAction="#addRegister" prefHeight="25.0" prefWidth="200.0" styleClass="buttonadd" text="Agregar" />
+            <Button fx:id="btnMod" disable="true" mnemonicParsing="false" onAction="#modify" prefHeight="25.0" prefWidth="200.0" text="Modificar">
                <VBox.margin>
                   <Insets />
                </VBox.margin>
             </Button>
-            <Button mnemonicParsing="false" onAction="#deleteRegister" prefHeight="25.0" prefWidth="200.0" styleClass="buttondel" text="Eliminar" />
-            <Button layoutX="20.0" layoutY="55.0" mnemonicParsing="false" onAction="#showReport" prefHeight="25.0" prefWidth="200.0" text="Imprimir" />
+            <Button fx:id="btnDel" disable="true" mnemonicParsing="false" onAction="#deleteRegister" prefHeight="25.0" prefWidth="200.0" styleClass="buttondel" text="Eliminar" />
+            <Button fx:id="btnImp" disable="true" layoutX="20.0" layoutY="55.0" mnemonicParsing="false" onAction="#showReport" prefHeight="25.0" prefWidth="200.0" text="Imprimir" />
          </children>
          <BorderPane.margin>
             <Insets />
