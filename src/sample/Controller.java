@@ -18,8 +18,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import net.sf.jasperreports.engine.JRException;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,6 +35,7 @@ import java.util.Optional;
 public class Controller extends Application {
     private static ConexionMySQL objConexion;
     private Alert resultado;
+    private Dialog about;
     private Connection conexion;
     private ObservableList<ObservableList> data;
     private Stage stage;
@@ -628,6 +631,7 @@ public class Controller extends Application {
             }
         }
     }
+
     //Crea los botones de buen pastor en el gridpane
     public void loadStatusBP() {
 
@@ -688,6 +692,7 @@ public class Controller extends Application {
             }
         }
     }
+
     //Obtiene el estado del nicho para poder marcarlo ocupado o libre
     private String getStatus(String id){
 
@@ -720,6 +725,7 @@ public class Controller extends Application {
 
         return status;
     }
+
     //Obtiene el tipo de nicho que es para marcarlo diferente
     private String getType(String id){
         try{
@@ -745,6 +751,7 @@ public class Controller extends Application {
         }
         return type;
     }
+
     //Checa cual pestaña esta seleccionada y carga los botones de disponiblidad
     public void checkTab(){
         if(tabPaneD.getSelectionModel().getSelectedItem()==tabPiedad) {
@@ -756,6 +763,7 @@ public class Controller extends Application {
             loadStatusBP();
         }
     }
+
     //Muestra el reporte segun la tabla cuando le das imprimir
     public void showReport(){
         try {
@@ -770,6 +778,7 @@ public class Controller extends Application {
         }
     }
 
+    //Se usa en modificar para obtener la información de la tabla en los textfields
     private void getClientInfoTable() {
         switch (currentTable) {
             case "Clientes" : {
@@ -921,6 +930,7 @@ public class Controller extends Application {
         }
     }
 
+    //Abre ventana de modificar
     public void modify(ActionEvent ev){
         String[] optionalEntries;
         String[] requiredEntries, otherTableEntries;
@@ -982,5 +992,17 @@ public class Controller extends Application {
             resultado = new Alert(Alert.AlertType.INFORMATION, "Eliga el registro a modificar.");
             resultado.show();
         }
+    }
+
+    //Ventana de acerca de
+    public void runAbout() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("about.fxml"));
+        Parent parent = loader.load();
+        scene=new Scene(parent,600,291);
+        Stage dialog = new Stage();
+        dialog.initStyle(StageStyle.UTILITY);
+        dialog.setScene(scene);
+        dialog.showAndWait();
+
     }
 }

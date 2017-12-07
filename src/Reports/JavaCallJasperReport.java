@@ -37,25 +37,7 @@ public class JavaCallJasperReport {
         JasperViewer viewer = new JasperViewer(print,false); //Creamos la vista del Reporte
         viewer.setDefaultCloseOperation(DISPOSE_ON_CLOSE); // Le agregamos que se cierre solo el reporte cuando lo cierre el usuario
         viewer.setVisible(true);
-//        // Make sure the output directory exists.
-//        File outDir = new File("C:/jasperoutput");
-//        outDir.mkdirs();
-//
-//        // PDF Exportor.
-//        JRPdfExporter exporter = new JRPdfExporter();
-//
-//        ExporterInput exporterInput = new SimpleExporterInput(print);
-//        // ExporterInput
-//        exporter.setExporterInput(exporterInput);
-//
-//        // ExporterOutput
-//        OutputStreamExporterOutput exporterOutput = new SimpleOutputStreamExporterOutput(
-//                "C:/jasperoutput/FirstJasperReport.pdf");
-//        // Output
-//        exporter.setExporterOutput(exporterOutput);
-//
-//        //
-//        SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+
 
     }
     //Conexión

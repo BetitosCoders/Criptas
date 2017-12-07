@@ -2,10 +2,22 @@
     -fx-background-color: #ffffff;
 	-fx-font-family:"Arial";
 }
+.background_vbox{
+-fx-background-color: rgb(51, 165, 247,.5);
+ -fx-background-radius: 10;
+}
+.background_login{
+	 -fx-background-image: url("1.jpg");
+    -fx-background-repeat:no-repeat;  
+    -fx-background-size:cover;
+	-fx-font-family:"Arial";
+
+}
 //boton normal
+
 .button{
 	-fx-background-color:#4cb4ff;
-	-fx-text-fill: #FFFFFF;
+	-fx-text-fill: #ffffff;
 }
 .button:hover{
 	
