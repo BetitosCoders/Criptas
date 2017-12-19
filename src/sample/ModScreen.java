@@ -124,12 +124,22 @@ public class ModScreen {
             else {
                 switch (currentTable) {
                     case "Clientes": {
-                        int ladoIndex = getLadoIndex();
-                        String idNicho = getNichoID();
-                        if (!checkLado(ladoIndex)) {
+                        int ladoIndex = getIndex("Lado*");
+                        String date = entryTxtFields[getIndex("Fecha de Inscripción*")].getText();
+                        String idNicho = entryTxtFields[getIndex("Nicho*")].getText();
+                        if (!checkLado(ladoIndex) || !checkNicho(idNicho)) {
                             new Alert(Alert.AlertType.ERROR, "El lado es incorrecto.").show();
                             break;
-                        } else {
+                        }
+                        else if (!checkNicho(idNicho)) {
+                            new Alert(Alert.AlertType.ERROR, "El nicho es incorrecto.").show();
+                            break;
+                        }
+                        else if (!checkDate(date)) {
+                            new Alert(Alert.AlertType.ERROR, "La fecha es incorrecta.").show();
+                            break;
+                        }
+                        else {
                             String queryIns = "UPDATE CLientes SET Nombre=?,AP_Paterno=?,AP_Materno=?,ID_Nicho=?," +
                                     "Lado=?,Saldo=?,Dirección=?,Teléfono=?,Fecha_Ins=?,Ben1=?,Ben1_Par=?," +
                                     "Ben2=?,Ben2_Par=?,Lim_Credito=? WHERE ID_Cliente=?";
@@ -152,80 +162,130 @@ public class ModScreen {
                         }
                     }
                     case "Pagos": {
-                        String queryPago = "UPDATE Pagos SET Cantidad=?, Fecha=?, ID_Nicho=?, Tipo_Nicho=?, ID_Cliente=? WHERE ID_Pago=?";
-                        try {
-                            PreparedStatement update = objConexion.getConexion().prepareStatement(queryPago);
-                            for(int i=0;i<entryTxtFields.length;i++){
-                                update.setString(i+1, entryTxtFields[i].getText());
-                            }
-                            String idClient = cmbClients.getSelectionModel().getSelectedItem().toString();
-                            String[] idClientSep = idClient.split(":");
-                            idClient = idClientSep[0];
-                            update.setString(5, idClient);
-                            update.setString(6, ID);
-                            update.execute();
-                        } catch (SQLException e) {
-                            new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
-                            e.printStackTrace();
+                        String nicho = entryTxtFields[getIndex("Nicho*")].getText();
+                        String date = entryTxtFields[getIndex("Fecha*")].getText();
+                        String type = entryTxtFields[getIndex("Tipo de Nicho*")].getText();
+                        if (!checkDouble(getIndex("Cantidad*"))) {
+                            new Alert(Alert.AlertType.ERROR, "La cantidad es incorrecta.").show();
+                            break;
                         }
-                        Node source = (Node) event.getSource();
-                        switchScene(source);
-                        break;
+                        else if (!checkNicho(nicho)) {
+                            new Alert(Alert.AlertType.ERROR, "El nicho es incorrecto.").show();
+                            break;
+                        }
+                        else if (!checkDate(date)){
+                            new Alert(Alert.AlertType.ERROR, "La fecha es incorrecta.").show();
+                            break;
+                        }
+                        else if (!checkType(type)) {
+                            new Alert(Alert.AlertType.ERROR, "El tipo es incorrecto.").show();
+                            break;
+                        }
+                        else {
+                            String queryPago = "UPDATE Pagos SET Cantidad=?, Fecha=?, ID_Nicho=?, Tipo_Nicho=?, ID_Cliente=? WHERE ID_Pago=?";
+                            try {
+                                PreparedStatement update = objConexion.getConexion().prepareStatement(queryPago);
+                                for(int i=0;i<entryTxtFields.length;i++){
+                                    update.setString(i+1, entryTxtFields[i].getText());
+                                }
+                                String idClient = cmbClients.getSelectionModel().getSelectedItem().toString();
+                                String[] idClientSep = idClient.split(":");
+                                idClient = idClientSep[0];
+                                update.setString(5, idClient);
+                                update.setString(6, ID);
+                                update.execute();
+                            } catch (SQLException e) {
+                                new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
+                                e.printStackTrace();
+                            }
+                            Node source = (Node) event.getSource();
+                            switchScene(source);
+                            break;
+                        }
                     }
                     case "Gastos": {
-                        String queryGasto="UPDATE Gastos SET Descripción=?, Monto=?, Fecha=? WHERE ID_Gasto=?";
-                        try {
-                            PreparedStatement update = objConexion.getConexion().prepareStatement(queryGasto);
-                            for(int i=0;i<entryTxtFields.length;i++){
-                                update.setString(i+1, entryTxtFields[i].getText());
-                            }
-                            update.setString(4, ID);
-                            update.execute();
-                        } catch (SQLException e) {
-                            new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
-                            e.printStackTrace();
+                        String date = entryTxtFields[getIndex("Fecha*")].getText();
+                        if (!checkDouble(getIndex("Monto*"))){
+                            new Alert(Alert.AlertType.ERROR, "El monto es incorrecto.").show();
+                            break;
                         }
-                        Node source = (Node) event.getSource();
-                        switchScene(source);
-                        break;
+                        else if (!checkDate(date)){
+                            new Alert(Alert.AlertType.ERROR, "La fecha es incorrecta.").show();
+                            break;
+                        }
+                        else {
+                            String queryGasto="UPDATE Gastos SET Descripción=?, Monto=?, Fecha=? WHERE ID_Gasto=?";
+                            try {
+                                PreparedStatement update = objConexion.getConexion().prepareStatement(queryGasto);
+                                for(int i=0;i<entryTxtFields.length;i++){
+                                    update.setString(i+1, entryTxtFields[i].getText());
+                                }
+                                update.setString(4, ID);
+                                update.execute();
+                            } catch (SQLException e) {
+                                new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
+                                e.printStackTrace();
+                            }
+                            Node source = (Node) event.getSource();
+                            switchScene(source);
+                            break;
+                        }
                     }
                     case "Documentos": {
-                        String queryGasto="UPDATE Documentos SET Tipo=?, Fecha=?, ID_Cliente=? WHERE ID_Documentos=?";
-                        try {
-                            PreparedStatement update = objConexion.getConexion().prepareStatement(queryGasto);
-                            for(int i=0;i<entryTxtFields.length;i++){
-                                update.setString(i+1, entryTxtFields[i].getText());
-                            }
-                            String idClient = cmbClients.getSelectionModel().getSelectedItem().toString();
-                            String[] idClientSep = idClient.split(":");
-                            idClient = idClientSep[0];
-                            update.setString(3, idClient);
-                            update.setString(4, ID);
-                            update.execute();
-                        } catch (SQLException e) {
-                            new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
-                            e.printStackTrace();
+                        String date = entryTxtFields[getIndex("Fecha*")].getText();
+                        if (!checkDate(date)) {
+                            new Alert(Alert.AlertType.ERROR, "La fecha es incorrecta.").show();
+                            break;
                         }
-                        Node source = (Node) event.getSource();
-                        switchScene(source);
-                        break;
+                        else {
+                            String queryGasto="UPDATE Documentos SET Tipo=?, Fecha=?, ID_Cliente=? WHERE ID_Documentos=?";
+                            try {
+                                PreparedStatement update = objConexion.getConexion().prepareStatement(queryGasto);
+                                for(int i=0;i<entryTxtFields.length;i++){
+                                    update.setString(i+1, entryTxtFields[i].getText());
+                                }
+                                String idClient = cmbClients.getSelectionModel().getSelectedItem().toString();
+                                String[] idClientSep = idClient.split(":");
+                                idClient = idClientSep[0];
+                                update.setString(3, idClient);
+                                update.setString(4, ID);
+                                update.execute();
+                            } catch (SQLException e) {
+                                new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
+                                e.printStackTrace();
+                            }
+                            Node source = (Node) event.getSource();
+                            switchScene(source);
+                            break;
+                        }
                     }
                     case "Ingresos":{
-                        String queryGasto="UPDATE Ingresos SET Descripción=?, Monto=?, Fecha=? WHERE ID_Ingreso=?";
-                        try {
-                            PreparedStatement update = objConexion.getConexion().prepareStatement(queryGasto);
-                            for(int i=0;i<entryTxtFields.length;i++){
-                                update.setString(i+1, entryTxtFields[i].getText());
-                            }
-                            update.setString(4, ID);
-                            update.execute();
-                        } catch (SQLException e) {
-                            new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
-                            e.printStackTrace();
+                        String date = entryTxtFields[getIndex("Fecha*")].getText();
+                        if (!checkDate(date)) {
+                            new Alert(Alert.AlertType.ERROR, "La fecha es incorrecta.").show();
+                            break;
                         }
-                        Node source = (Node) event.getSource();
-                        switchScene(source);
-                        break;
+                        else if (checkDouble(getIndex("Monto*"))) {
+                            new Alert(Alert.AlertType.ERROR, "El monto es incorrecto.").show();
+                            break;
+                        }
+                        else {
+                            String queryGasto="UPDATE Ingresos SET Descripción=?, Monto=?, Fecha=? WHERE ID_Ingreso=?";
+                            try {
+                                PreparedStatement update = objConexion.getConexion().prepareStatement(queryGasto);
+                                for(int i=0;i<entryTxtFields.length;i++){
+                                    update.setString(i+1, entryTxtFields[i].getText());
+                                }
+                                update.setString(4, ID);
+                                update.execute();
+                            } catch (SQLException e) {
+                                new Alert(Alert.AlertType.INFORMATION, e.getMessage()).show();
+                                e.printStackTrace();
+                            }
+                            Node source = (Node) event.getSource();
+                            switchScene(source);
+                            break;
+                        }
                     }
                 }
 
@@ -333,22 +393,13 @@ public class ModScreen {
         VBox.setVgrow(vBox1, Priority.ALWAYS);
     }
 
-    private int getLadoIndex() {
-        for (int i = 0; i < entryLbls.length; i++) {
-            if (entryLbls[i].getText().equals("Lado*")) {
+    private int getIndex(String labelText) {
+        for (int i=0;i<entryLbls.length;i++){
+            if(entryLbls[i].getText().equals(labelText)){
                 return i;
             }
         }
-        return 0;
-    }
-
-    private String getNichoID() {
-        for (int i = 0; i < entryLbls.length; i++) {
-            if (entryLbls[i].getText().equals("Nicho*")) {
-                return entryTxtFields[i].getText();
-            }
-        }
-        return null;
+        return -1;
     }
 
     private void fillTextBoxes() {
@@ -374,6 +425,18 @@ public class ModScreen {
         } else {
             return false;
         }
+    }
+
+    private boolean checkNicho(String _nicho) {
+            return _nicho.matches("[A-M][0-9]{1,2}") || _nicho.matches("[N][0-9]{1,2}[-][1-4][P]") || _nicho.matches("[A-N][0-9]{1,2}[-][1-4]");
+    }
+
+    private boolean checkDate(String _date){
+        return _date.matches("[0-9]{4}[-](([0][0-9])|([1]?[0-2]))[-](([0-2][0-9])|([3][0-1]))");
+    }
+
+    private boolean checkType(String _type){
+        return _type.equals("Imagen") || _type.equals("Normal");
     }
 
     private void fillClientsCombo() {

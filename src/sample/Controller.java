@@ -376,7 +376,7 @@ public class Controller extends Application {
                 case "Clientes": {
                     // Se fijan campos a insertar y sus nombres a mostrar.
                     optionalEntries = new String[]{"Beneficicario 2", "Parentesco de Beneficiario 2", "Limite de Credito"};
-                    requiredEntries = new String[]{"Nombre", "Apellido Paterno", "Apellido Materno", "Nicho", "Lado", "Saldo", "Dirección", "Telefono", "Fecha de Inscripcion", "Benficiario 1", "Parentesco de Beneficiario 1"};
+                    requiredEntries = new String[]{"Nombre", "Apellido Paterno", "Apellido Materno", "Nicho", "Lado", "Saldo", "Dirección", "Telefono", "Fecha de Inscripción", "Benficiario 1", "Parentesco de Beneficiario 1"};
                     otherTableEntries = new String[]{"Nombre del Difunto", "Apellido Paterno del Difunto", "Apellido Materno del Difunto"};
                     // Se crea una pantalla para insertar y se muestra dicha pantalla.
                     AddScreen clienteScreen = new AddScreen(17, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
