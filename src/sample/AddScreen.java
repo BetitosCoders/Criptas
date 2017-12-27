@@ -36,7 +36,7 @@ class AddScreen {
     private int hboxCount;
     private int idCliente;
     private ConexionMySQL objConexion;
-    private String currentTable;
+    private String currentTable, lado;
     private String[] optionalEntryNames, requiredEntryNames, otherTableEntries;
     private TextField[] entryTxtFields;
     private Label[] entryLbls = null;
@@ -119,16 +119,38 @@ class AddScreen {
             else {
                 switch (currentTable) {
                     case "Clientes": {
-                        int ladoIndex = getLadoIndex();
-                        String idNicho = getNichoID();
+                        int ladoIndex = getIndex("Lado*");
+                        String idNicho = entryTxtFields[getIndex("Nicho*")].getText();
                         if (!checkLado(ladoIndex)) {
                             new Alert(Alert.AlertType.ERROR, "El lado es incorrecto.").show();
                             break;
-                        } else {
+                        }
+                        else if (!checkNicho(idNicho)) {
+                            new Alert(Alert.AlertType.ERROR, "El nicho es incorrecto.").show();
+                            break;
+                        }
+                        else if (!checkDouble(getIndex("Saldo*"))) {
+                            new Alert(Alert.AlertType.ERROR, "El saldo es incorrecto.").show();
+                            break;
+                        }
+                        else if(!checkPhone(entryTxtFields[getIndex("Telefono*")].getText())){
+                            new Alert(Alert.AlertType.ERROR, "El telefono es incorrecto.").show();
+                            break;
+                        }
+                        else if (!checkDate(entryTxtFields[getIndex("Fecha de Inscripción*")].getText())) {
+                            new Alert(Alert.AlertType.ERROR, "La fecha es incorrecta.").show();
+                            break;
+                        }
+                        else if (!checkCred(entryTxtFields[getIndex("Limite de Credito")].getText())) {
+                            new Alert(Alert.AlertType.ERROR, "El limite de credito es incorrecto.").show();
+                            break;
+                        }
+                        else {
+                            nullLimCred();
                             String queryIns = "INSERT INTO Clientes(Nombre,AP_Paterno,AP_Materno,ID_Nicho,Lado,Saldo,Dirección,Teléfono,Fecha_Ins,Ben1,Ben1_Par,Ben2,Ben2_Par,Lim_Credito)" +
                                     " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                             idCliente = getLastClientID();
-                            String queryUpdate = "UPDATE " + entryTxtFields[ladoIndex].getText() + " SET ID_Cliente=?, Estado='Ocupado', Nombre_Dif=?, AP_Pat_Dif=?, AP_Mat_Dif=? WHERE ID_Nicho=?";
+                            String queryUpdate = "UPDATE " + lado + " SET ID_Cliente=?, Estado='Ocupado', Nombre_Dif=?, AP_Pat_Dif=?, AP_Mat_Dif=? WHERE ID_Nicho=?";
                             try {
                                 PreparedStatement insert = fillInsertStatementClientes(queryIns);
                                 PreparedStatement update = fillUpdateStatementClientes(queryUpdate);
@@ -148,7 +170,11 @@ class AddScreen {
                     case "Pagos": {
                         List<String> clientInfo = clientData;
                         if (clientInfo != null) {
-                            if (checkDouble(0)) {
+                            if (!checkDate(entryTxtFields[getIndex("Fecha*")].getText())) {
+                                new Alert(Alert.AlertType.ERROR, "La fecha es incorrecta.").show();
+                                break;
+                            }
+                            else if (checkDouble(0)) {
                                 String clientID = clientInfo.get(0);
                                 String nichoID = clientInfo.get(2);
                                 String nichoType = clientInfo.get(3);
@@ -168,7 +194,7 @@ class AddScreen {
                                 switchScene(source);
                                 break;
                             } else {
-                                new Alert(Alert.AlertType.ERROR, "Campo incorrecto.").show();
+                                new Alert(Alert.AlertType.ERROR, "La cantidad es incorrecta.").show();
                                 break;
                             }
                         }
@@ -176,7 +202,11 @@ class AddScreen {
                     }
                     case "Gastos": {
                         String query = "INSERT INTO Gastos(Descripcion, Monto, Fecha) VALUES(?,?,?)";
-                        if (checkDouble(1)) {
+                        if (!checkDate(entryTxtFields[getIndex("Fecha*")].getText())) {
+                            new Alert(Alert.AlertType.ERROR, "La fecha es incorrecta.").show();
+                            break;
+                        }
+                        else if (checkDouble(1)) {
                             try {
                                 PreparedStatement insert = objConexion.getConexion().prepareStatement(query);
                                 insert.setString(1, entryTxtFields[0].getText());
@@ -190,32 +220,42 @@ class AddScreen {
                             switchScene(source);
                             break;
                         } else {
-                            new Alert(Alert.AlertType.ERROR, "Campo incorrecto.").show();
+                            new Alert(Alert.AlertType.ERROR, "El monto es incorrecto.").show();
                             break;
                         }
                     }
                     case "Documentos": {
-                        List<String> clientInfo = clientData;
-                        String clientID = clientInfo.get(0);
-                        String docPath = Controller.docPath;
-                        String query = "INSERT INTO Documentos(ID_Cliente, Tipo, Fecha, Ruta) VALUES(?,?,?,?)";
-                        try {
-                            PreparedStatement insert = objConexion.getConexion().prepareStatement(query);
-                            insert.setString(1, clientID);
-                            insert.setString(2, entryTxtFields[0].getText());
-                            insert.setString(3, entryTxtFields[1].getText());
-                            insert.setString(4, docPath);
-                            insert.execute();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
+                        if (!checkDate(entryTxtFields[getIndex("Fecha*")].getText())) {
+                            new Alert(Alert.AlertType.ERROR, "La fecha es incorrecta.").show();
+                            break;
                         }
-                        Node source = (Node) event.getSource();
-                        switchScene(source);
-                        break;
+                        else {
+                            List<String> clientInfo = clientData;
+                            String clientID = clientInfo.get(0);
+                            String docPath = Controller.docPath;
+                            String query = "INSERT INTO Documentos(ID_Cliente, Tipo, Fecha, Ruta) VALUES(?,?,?,?)";
+                            try {
+                                PreparedStatement insert = objConexion.getConexion().prepareStatement(query);
+                                insert.setString(1, clientID);
+                                insert.setString(2, entryTxtFields[0].getText());
+                                insert.setString(3, entryTxtFields[1].getText());
+                                insert.setString(4, docPath);
+                                insert.execute();
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                            Node source = (Node) event.getSource();
+                            switchScene(source);
+                            break;
+                        }
                     }
                     case "Ingresos": {
                         String query = "INSERT INTO Ingresos(Descripcion, Monto, Fecha) VALUES(?,?,?)";
-                        if (checkDouble(1)) {
+                        if (!checkDate(entryTxtFields[getIndex("Fecha*")].getText())) {
+                            new Alert(Alert.AlertType.ERROR, "La fecha es incorrecta.").show();
+                            break;
+                        }
+                        else if (checkDouble(1)) {
                             try {
                                 PreparedStatement insert = objConexion.getConexion().prepareStatement(query);
                                 insert.setString(1, entryTxtFields[0].getText());
@@ -229,7 +269,7 @@ class AddScreen {
                             switchScene(source);
                             break;
                         } else {
-                            new Alert(Alert.AlertType.ERROR, "Campo incorrecto.").show();
+                            new Alert(Alert.AlertType.ERROR, "El monto es incorrecto.").show();
                             break;
                         }
                     }
@@ -249,6 +289,38 @@ class AddScreen {
         vBox1.getChildren().add(buttonsH);
     }
 
+    private boolean checkNicho(String _nicho) {
+        return _nicho.matches("[A-M][0-9]{1,2}") || _nicho.matches("[N][0-9]{1,2}[-][1-4][P]") || _nicho.matches("[A-N][0-9]{1,2}[-][1-4]");
+    }
+
+    private boolean checkDate(String _date){
+        return _date.matches("[0-9]{4}[-](([0][0-9])|([1]?[0-2]))[-](([0-2][0-9])|([3][0-1]))");
+    }
+
+    private boolean checkPhone(String _phone){
+        return _phone.matches("[0-9]{10}");
+    }
+
+    private boolean checkCred(String _cred) {
+        return _cred.isEmpty() || checkDouble(getIndex("Limite de Credito"));
+    }
+
+    private int getIndex(String labelText) {
+        for (int i=0;i<entryLbls.length;i++){
+            if(entryLbls[i].getText().equals(labelText)){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void nullLimCred() {
+        String x = entryTxtFields[getIndex("Limite de Credito")].getText();
+        if (x == null || x.isEmpty()) {
+            entryTxtFields[getIndex("Limite de Credito")].setText("0");
+        }
+    }
+
     private PreparedStatement fillInsertStatementClientes(String _query) {
         try {
             PreparedStatement insert = objConexion.getConexion().prepareStatement(_query);
@@ -260,7 +332,11 @@ class AddScreen {
                         new Alert(Alert.AlertType.ERROR, "Campos Incorrectos.").show();
                         break;
                     }
-                } else {
+                }
+                else if (i == getIndex("Limite de Credito")) {
+                    insert.setDouble(i+1, Double.parseDouble(entryTxtFields[i].getText()));
+                }
+                else {
                     insert.setString(i + 1, entryTxtFields[i].getText());
                 }
             }
@@ -306,27 +382,9 @@ class AddScreen {
         }
     }
 
-    private int getLadoIndex() {
-        for (int i = 0; i < entryLbls.length; i++) {
-            if (entryLbls[i].getText().equals("Lado*")) {
-                return i;
-            }
-        }
-        return 0;
-    }
-
-    private String getNichoID() {
-        for (int i = 0; i < entryLbls.length; i++) {
-            if (entryLbls[i].getText().equals("Nicho*")) {
-                return entryTxtFields[i].getText();
-            }
-        }
-        return null;
-    }
-
     private int getFechaIndex() {
         for (int i = 0; i < entryLbls.length; i++) {
-            if (entryLbls[i].getText().equals("Fecha*") || entryLbls[i].getText().equals("Fecha de Inscripcion*")) {
+            if (entryLbls[i].getText().equals("Fecha*") || entryLbls[i].getText().equals("Fecha de Inscripción*")) {
                 return i;
             }
         }
@@ -341,10 +399,10 @@ class AddScreen {
 
     private boolean checkLado(int _ladoIndex) {
         if (entryTxtFields[_ladoIndex].getText().equals("Derecho")) {
-            entryTxtFields[_ladoIndex].setText("Piedad");
+            lado = "Piedad";
             return true;
         } else if (entryTxtFields[_ladoIndex].getText().equals("Izquierdo")) {
-            entryTxtFields[_ladoIndex].setText("Buen_Pastor");
+            lado = "Buen_Pastor";
             return true;
         } else {
             return false;
@@ -367,7 +425,7 @@ class AddScreen {
     private boolean checkForEmptyTxt() {
         for(int i=0;i<entryLbls.length;i++){
             if(entryLbls[i].getText().matches(".*\\*$")){
-                String x=entryTxtFields[2].getText();
+                String x=entryTxtFields[i].getText();
                 if(x == null || x.isEmpty()){
                     return true;
                 }
