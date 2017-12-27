@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -14,14 +15,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import javax.xml.soap.Text;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
-import static sample.Controller.clientData;
 
 public class ModScreen {
     private String[] requiredEntryNames, optionalEntryNames, otherTableEntries;
@@ -38,8 +36,10 @@ public class ModScreen {
     private String currentTable;
     private String ID;
     private static ConexionMySQL objConexion;
-    ComboBox cmbClients = new ComboBox();
-    VBox cmbVbox = new VBox();
+    private ListView listClients = new ListView();
+    private TextField search = new TextField();
+    private VBox listVBox = new VBox();
+    private static List<String> clientDataList;
 
     ModScreen(String[] requiredEntryNames, String[] optionalEntryNames, String[] otherTableEntries, int entries, String currentTable, ConexionMySQL objConexion, String ID) {
         this.requiredEntryNames = requiredEntryNames;
@@ -76,7 +76,7 @@ public class ModScreen {
             vBoxes[i].getChildren().add(entryLbls[i]);
             vBoxes[i].getChildren().add(entryTxtFields[i]);
             if ((currentTable.equals("Pagos") || currentTable.equals("Documentos")) && !cmbAdded){
-                hBoxes[k].getChildren().add(cmbVbox);
+                hBoxes[k].getChildren().add(listVBox);
                 j++;
                 cmbAdded = true;
             }
@@ -188,7 +188,7 @@ public class ModScreen {
                                 for(int i=0;i<entryTxtFields.length;i++){
                                     update.setString(i+1, entryTxtFields[i].getText());
                                 }
-                                String idClient = cmbClients.getSelectionModel().getSelectedItem().toString();
+                                String idClient = listClients.getSelectionModel().getSelectedItem().toString();
                                 String[] idClientSep = idClient.split(":");
                                 idClient = idClientSep[0];
                                 update.setString(5, idClient);
@@ -244,7 +244,7 @@ public class ModScreen {
                                 for(int i=0;i<entryTxtFields.length;i++){
                                     update.setString(i+1, entryTxtFields[i].getText());
                                 }
-                                String idClient = cmbClients.getSelectionModel().getSelectedItem().toString();
+                                String idClient = listClients.getSelectionModel().getSelectedItem().toString();
                                 String[] idClientSep = idClient.split(":");
                                 idClient = idClientSep[0];
                                 update.setString(3, idClient);
@@ -403,7 +403,7 @@ public class ModScreen {
     }
 
     private void fillTextBoxes() {
-        List<String> clientInfo = clientData;
+        List<String> clientInfo = Controller.clientData;
         int i;
         for (i = 0; i < requiredEntryNames.length + optionalEntryNames.length; i++) {
             entryTxtFields[i].setText(clientInfo.get(i));
@@ -440,23 +440,57 @@ public class ModScreen {
     }
 
     private void fillClientsCombo() {
+        clientDataList = FXCollections.observableArrayList();
         int k;
         if (currentTable.equals("Pagos"))
             k=4;
         else
             k=2;
-        for (int i = k;i<clientData.size();i++) {
-            cmbClients.getItems().add(clientData.get(i));
+        for (int i = k; i< Controller.clientData.size(); i++) {
+            listClients.getItems().add(Controller.clientData.get(i));
         }
-        for(int j = 0;j<cmbClients.getItems().size();j++){
-            if (cmbClients.getItems().get(j).toString().matches(".*\\*$")) {
-                cmbClients.getSelectionModel().select(j);
+        for(int j = 0;j<listClients.getItems().size();j++){
+            if (listClients.getItems().get(j).toString().matches(".*\\*$")) {
+                listClients.getSelectionModel().select(j);
                 break;
             }
         }
+        search.setPrefSize(300, 20);
         Label cmbLabel = new Label("Clientes");
-        cmbVbox.getChildren().add(cmbLabel);
-        cmbVbox.getChildren().add(cmbClients);
+        listClients.setMaxHeight(100);
+        listVBox.getChildren().add(cmbLabel);
+        listVBox.getChildren().add(search);
+        listVBox.getChildren().add(listClients);
+        search.setOnKeyTyped ( event -> {
+            clientDataList.clear();
+            ResultSet results = objConexion.consultar("SELECT ID_Cliente, Nombre, AP_Paterno, AP_Materno FROM Clientes WHERE Nombre LIKE '%" + search.getText() + "%'");
+            try {
+                while (results.next()) {
+                    if (results.getString("ID_Cliente").equals(ID)) {
+                        clientDataList.add(results.getString("ID_Cliente") + ": " +
+                                results.getString("Nombre") + " " +
+                                results.getString("AP_Paterno") + " " +
+                                results.getString("AP_Materno") + "*");
+                    }
+                    else {
+                        clientDataList.add(results.getString("ID_Cliente") + ": " +
+                                results.getString("Nombre") + " " +
+                                results.getString("AP_Paterno") + " " +
+                                results.getString("AP_Materno"));
+                    }
+                }
+                listClients.getItems().clear();
+                listClients.getItems().addAll(clientDataList);
+                for(int j = 0;j<listClients.getItems().size();j++){
+                    if (listClients.getItems().get(j).toString().matches(".*\\*$")) {
+                        listClients.getSelectionModel().select(j);
+                        break;
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     Scene makeScene() {

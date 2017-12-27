@@ -233,7 +233,7 @@ class AddScreen {
                             List<String> clientInfo = clientData;
                             String clientID = clientInfo.get(0);
                             String docPath = Controller.docPath;
-                            String query = "INSERT INTO Documentos(ID_Cliente, Tipo, Fecha, Ruta) VALUES(?,?,?,?)";
+                            String query = "INSERT INTO Documentos(ID_Clientes, Tipo, Fecha, Ruta) VALUES(?,?,?,?)";
                             try {
                                 PreparedStatement insert = objConexion.getConexion().prepareStatement(query);
                                 insert.setString(1, clientID);

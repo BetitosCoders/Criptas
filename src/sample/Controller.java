@@ -215,6 +215,7 @@ public class Controller extends Application {
         btnImp.setDisable(false);
         tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "Documentos";
+        currentId = "ID_Documentos";
         callProcedure("{call showDocs()}");
     }
 
@@ -421,7 +422,7 @@ public class Controller extends Application {
                     Calendar cal = Calendar.getInstance();
                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
                     String time = sdf.format(cal.getTime());
-                    File docOut = new File("./" + clientData.get(1) + ":" + clientData.get(0) + "-" + time);
+                    File docOut = new File(clientData.get(1) + ":" + clientData.get(0) + "-" + time);
                     try {
                         Files.copy(doc.toPath(), docOut.toPath());
                         docPath = docOut.getAbsolutePath();
@@ -898,7 +899,7 @@ public class Controller extends Application {
                 String idClient = null;
                 try {
                     while (Docs.next()) {
-                        idClient = Docs.getString("ID_Cliente");
+                        idClient = Docs.getString("ID_Clientes");
                         clientData.add(Docs.getString("Tipo"));
                         clientData.add(Docs.getString("Fecha"));
                     }
