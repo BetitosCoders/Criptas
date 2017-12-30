@@ -45,8 +45,10 @@ public class Controller extends Application {
     private int cont;
     private String[] t = new String[200];
     private String nombre;
-    private String currentTable, currentId;
+    public static String currentTable;
+    private String currentId;
     private String tableinTab, status, type;
+    public static File doc;
     static List<String> clientData;
     static String docPath = null;
     @FXML
@@ -85,8 +87,6 @@ public class Controller extends Application {
             if (userCheck(txtUser.getText(), txtPass.getText())) {
                 Node source = (Node) ev.getSource();
                 switchScene("sample.fxml", source);
-
-
             } else {
                 resultado = new Alert(Alert.AlertType.ERROR, "Nombre de usuario o contraseña equivoacada.");
                 resultado.show();
@@ -96,7 +96,6 @@ public class Controller extends Application {
 
     // La utilizamos para cambiar de escena.
     private void switchScene(String sceneName, Node source) {
-
         Parent parent = null;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneName));
@@ -386,27 +385,12 @@ public class Controller extends Application {
                     break;
                 }
                 case "Pagos": {
-                    // Se utiliza una funcion declarada mas adelante para obtener el cliente que va a pagar.
-                    List<String> clientIDyNombre = getClientInfoCombo();
-                    // Se revisa que se eligio un cliente.
-                    if (clientIDyNombre != null) {
-                        // Se fijan campos a insertar y sus nombres a mostrar.
-                        optionalEntries = new String[]{};
-                        requiredEntries = new String[]{"Cantidad", "Fecha"};
-                        otherTableEntries = new String[]{};
-                        // Se crea una pantalla para insertar y se muestra dicha pantalla.
-                        AddScreen pagoScreen = new AddScreen(2, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
-                        Node source = (Node) ev.getSource();
-                        ((Stage) source.getScene().getWindow()).setScene(pagoScreen.makeScene());
-                        break;
-                    } else {
-                        new Alert(Alert.AlertType.ERROR, "No se eligio ningun cliente.").show();
-                        break;
-                    }
+                    Node source = (Node) ev.getSource();
+                    switchScene("clientPicker.fxml", source);
+                    break;
                 }
                 case "Documentos": {
                     // Se utiliza una funcion declarada mas adelante para obtener el cliente que va a pagar.
-                    List<String> clientIDyNombre = getClientInfoCombo();
                     /* Se le muestra una pantalla al usuario para que elija el documento que quiere guardar.
                     * La pantalla solo permite elegir archivos pdf o imagenes. */
                     FileChooser docChoose = new FileChooser();
@@ -417,32 +401,11 @@ public class Controller extends Application {
                     /* Se obtiene el archivo elegido y se guarda una copia en la carpeta del proyecto.
                     * El archivo se guarda con el nombre del cliente, el nicho y la fecha y hora para
                     * nombre iguales. */
-                    File doc;
                     doc = docChoose.showOpenDialog(source.getScene().getWindow());
-                    Calendar cal = Calendar.getInstance();
-                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-                    String time = sdf.format(cal.getTime());
-                    File docOut = new File(clientData.get(1) + ":" + clientData.get(0) + "-" + time);
-                    try {
-                        Files.copy(doc.toPath(), docOut.toPath());
-                        docPath = docOut.getAbsolutePath();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     // Se revisa que se eligio un cliente.
-                    if (clientIDyNombre != null) {
-                        // Se fijan campos a insertar y sus nombres a mostrar.
-                        optionalEntries = new String[]{};
-                        requiredEntries = new String[]{"Tipo", "Fecha"};
-                        otherTableEntries = new String[]{};
-                        // Se crea una pantalla para insertar y se muestra dicha pantalla.
-                        AddScreen pagoScreen = new AddScreen(2, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
-                        ((Stage) source.getScene().getWindow()).setScene(pagoScreen.makeScene());
-                        break;
-                    } else {
-                        new Alert(Alert.AlertType.ERROR, "No se eligio ningun cliente.").show();
-                        break;
-                    }
+                    // Se fijan campos a insertar y sus nombres a mostrar.
+                    switchScene("clientPicker.fxml", source);
+                    break;
                 }
                 case "Gastos": {
                     // Se fijan campos a insertar y sus nombres a mostrar.

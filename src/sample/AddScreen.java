@@ -175,9 +175,9 @@ class AddScreen {
                                 break;
                             }
                             else if (checkDouble(0)) {
-                                String clientID = clientInfo.get(0);
-                                String nichoID = clientInfo.get(2);
-                                String nichoType = clientInfo.get(3);
+                                String clientID = clientPicker.clientId;
+                                String nichoID = clientPicker.clientNicho;
+                                String nichoType = clientPicker.tipoNicho;
                                 String query = "INSERT INTO Pagos(ID_Cliente, Tipo_Nicho, Fecha, Cantidad, ID_Nicho) VALUES(?,?,?,?,?)";
                                 try {
                                     PreparedStatement insert = objConexion.getConexion().prepareStatement(query);
@@ -230,8 +230,7 @@ class AddScreen {
                             break;
                         }
                         else {
-                            List<String> clientInfo = clientData;
-                            String clientID = clientInfo.get(0);
+                            String clientID = clientPicker.clientId;
                             String docPath = Controller.docPath;
                             String query = "INSERT INTO Documentos(ID_Clientes, Tipo, Fecha, Ruta) VALUES(?,?,?,?)";
                             try {

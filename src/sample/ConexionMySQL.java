@@ -26,8 +26,10 @@ public class ConexionMySQL {
 
     public String conectar() throws ClassNotFoundException {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            conexion = DriverManager.getConnection("jdbc:mysql://" + this.servidor + ":" + this.puerto + "/" + nombreBD, this.usuario, this.password);
+            //Class.forName("com.mysql.jdbc.Driver");
+            //conexion = DriverManager.getConnection("jdbc:mysql://" + this.servidor + ":" + this.puerto + "/" + nombreBD, this.usuario, this.password);
+            Class.forName("org.mariadb.jdbc.Driver");
+            conexion = DriverManager.getConnection("jdbc:mariadb://" + this.servidor + ":" + this.puerto + "/" + nombreBD, this.usuario, this.password);
             if (conexion != null)
                 return "Conexion exitosa.";
             else
