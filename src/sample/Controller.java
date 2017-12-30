@@ -24,7 +24,7 @@ import net.sf.jasperreports.engine.JRException;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -327,16 +327,47 @@ public class Controller extends Application {
     }
 
     // Borramos un registro seleccionado.
-    public void deleteRegister() {
+    public void deleteRegister() throws SQLException, IOException {
         /* Revisamos si se tiene seleccionado un registro. De
         no sera asi se le pide al usuario que seleccione uno. */
         if (isSelected()) {
             // Se le pide confirmacion para borrar el registro.
             if (confirmDelete()) {
+                if (currentTable.equals("Documentos")) {
+                    int id = getID();
+                    String ruta = null;
+                    ResultSet rutaRs = objConexion.consultar("SELECT Ruta FROM Documentos WHERE ID_Documentos=" + id);
+                    while (rutaRs.next()) {
+                        ruta = rutaRs.getString("Ruta");
+                    }
+                    Files.deleteIfExists(Paths.get(ruta));
+                }
                 // Se ejecuta consulta para borrar.
                 String queryRes = objConexion.insertModDel("DELETE FROM " + currentTable + " WHERE " + currentId + "=" + getID());
                 resultado = new Alert(Alert.AlertType.INFORMATION, queryRes);
                 resultado.show();
+                switch (currentTable) {
+                    case "Clientes": {
+                        clickClientes();
+                        break;
+                    }
+                    case "Pagos": {
+                        clickPagos();
+                        break;
+                    }
+                    case "Documentos": {
+                        clickDocumentos();
+                        break;
+                    }
+                    case "Gastos": {
+                        clickGastos();
+                        break;
+                    }
+                    case "Ingresos": {
+                        clickIngresos();
+                        break;
+                    }
+                }
             }
         } else {
             resultado = new Alert(Alert.AlertType.INFORMATION, "Eliga el registro a eliminar.");
