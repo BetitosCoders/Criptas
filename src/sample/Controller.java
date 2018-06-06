@@ -54,7 +54,7 @@ public class Controller extends Application {
     @FXML
     TableView tabledata;
     @FXML
-    Tab tabPiedad, tabBuen_Pastor, tabDisponibilidad, tabTabla;
+    Tab tabpiedad, tabbuen_pastor, tabDisponibilidad, tabTabla;
     @FXML
     TextField txtUser;
     @FXML
@@ -62,14 +62,13 @@ public class Controller extends Application {
     @FXML
     BorderPane borderMain;
     @FXML
-    Button btnClientes, btnPiedad, btnPastor, btnPagos, btnDocumentos, btnAdd, btnMod, btnDel,btnImp;
+    Button btnClientes, btnpiedad, btnPastor, btnPagos, btnDocumentos, btnAdd, btnMod, btnDel,btnImp;
     @FXML
     Button A1, A2;
     @FXML
     GridPane gridDisp, gridDisp2;
     @FXML
     private TabPane tabPaneM, tabPaneD;
-
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.stage = primaryStage;
@@ -88,7 +87,7 @@ public class Controller extends Application {
                 Node source = (Node) ev.getSource();
                 switchScene("sample.fxml", source);
             } else {
-                resultado = new Alert(Alert.AlertType.ERROR, "Nombre de usuario o contraseña equivoacada.");
+                resultado = new Alert(Alert.AlertType.ERROR, "Nombre de usuario o contraseña equivocada.");
                 resultado.show();
             }
         }
@@ -113,7 +112,8 @@ public class Controller extends Application {
         String estado = null;
         /* Guardamos el objeto de la conexion como la conexion en si porque
         * mas adelante necesitamos ambos. */
-        objConexion = new ConexionMySQL("root", "devpass9", "Criptas", "localhost", 3306);
+//        objConexion = new ConexionMySQL("u5818148_carlos", "=jkst[RHJunx", "u5818148_criptas", "62.210.247.90", 3306);
+        objConexion = new ConexionMySQL("root", "devpass9", "criptas", "localhost", 3306);
         try {
             estado = objConexion.conectar();
             conexion = objConexion.getConexion();
@@ -174,7 +174,7 @@ public class Controller extends Application {
         callProcedure("{call showClients()}");
     }
 
-    public void clickPiedad() {
+    public void clickpiedad() {
         btnAdd.setDisable(true);
         btnMod.setDisable(true);
         btnDel.setDisable(true);
@@ -182,7 +182,7 @@ public class Controller extends Application {
         tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "piedad";
         currentId = "ID_Nicho";
-        callProcedure("{call showPiedad()}");
+        callProcedure("{call showpiedad()}");
     }
 
     public void clickBuenPastor() {
@@ -546,7 +546,7 @@ public class Controller extends Application {
             if(numb[i].equals(btext)) {
 
                 if(tabPaneD.getSelectionModel().isSelected(1)) {
-                    clickPiedad();
+                    clickpiedad();
                     tabledata.getSelectionModel().select(i);
                     tabPaneM.getSelectionModel().select(tabTabla);
                     tabledata.scrollTo(i);
@@ -574,11 +574,11 @@ public class Controller extends Application {
         String[] typear=new String[200];
         int cont=0;
         Button[] button = new Button[200];
-    //Espacio entre los botones
+        //Espacio entre los botones
         gridDisp.setPadding(new Insets(5));
         gridDisp.setHgap(5);
         gridDisp.setVgap(5);
-    //For para crear el texto de los botones
+        //For para crear el texto de los botones
         for (char alphabet = 'A'; alphabet <= 'N'; alphabet++) {
             for(int i=1;i<=14;i++) {
                 //en este arreglo se guarda el nombre de los botones
@@ -590,11 +590,11 @@ public class Controller extends Application {
                 cont++;
             }
         }
-    //For para crear los botones
+        //For para crear los botones
         for (int r = 0; r < 14; r++) {
             for (int c = 0; c < 14; c++) {
                 //Calcula el numero del botón
-                 number = 14 * r + c;
+                number = 14 * r + c;
                 //Crea el botón
                 button[number] =new Button(t[number]);
                 numb[number]=t[number];
@@ -611,7 +611,7 @@ public class Controller extends Application {
                     case "Ocupado":
                         button[number].getStyleClass().add("buttonfree");
                         break;
-                     //Si es libre el estado usa buttonused
+                    //Si es libre el estado usa buttonused
                     case "Libre":
                         button[number].getStyleClass().add("buttonused");
                         break;
@@ -626,6 +626,7 @@ public class Controller extends Application {
             }
         }
     }
+
 
     //Crea los botones de buen pastor en el gridpane
     public void loadStatusBP() {
@@ -749,11 +750,11 @@ public class Controller extends Application {
 
     //Checa cual pestaña esta seleccionada y carga los botones de disponiblidad
     public void checkTab(){
-        if(tabPaneD.getSelectionModel().getSelectedItem()==tabPiedad) {
+        if(tabPaneD.getSelectionModel().getSelectedItem()==tabpiedad) {
             tableinTab="piedad";
             loadStatus();
         }
-        if(tabPaneD.getSelectionModel().getSelectedItem()==tabBuen_Pastor) {
+        if(tabPaneD.getSelectionModel().getSelectedItem()==tabbuen_pastor) {
             tableinTab="buen_pastor";
             loadStatusBP();
         }
@@ -802,9 +803,9 @@ public class Controller extends Application {
                 }
                 String lado;
                 if (clientData.get(4).equals("Derecho"))
-                    lado = "Piedad";
+                    lado = "piedad";
                 else
-                    lado = "Buen_Pastor";
+                    lado = "buen_pastor";
                 String queryDif = "SELECT * FROM " + lado + " WHERE ID_Nicho='" + clientData.get(3) + "'";
                 ResultSet dif = objConexion.consultar(queryDif);
                 try {

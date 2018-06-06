@@ -8,6 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jasperreports-6.0.0" level="project" />
-    <orderEntry type="library" exported="" name="Libraries" level="project" />
+    <orderEntry type="library" exported="" name="Libs" level="project" />
   </component>
 </module>
