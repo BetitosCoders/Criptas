@@ -79,7 +79,7 @@ public class Controller extends Application {
     @FXML
     private DatePicker dateApertura,dateLiquidacion;
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         this.stage = primaryStage;
 
     }
@@ -169,6 +169,10 @@ public class Controller extends Application {
 
     //Abre tab de Disponibilidad y botones superiores
     public void clickDisponibilidad(){
+        btnAdd.setDisable(true);
+        btnMod.setDisable(true);
+        btnDel.setDisable(true);
+        btnImp.setDisable(true);
         tabPaneM.getSelectionModel().select(tabDisponibilidad);
         btnDispBP.setVisible(true);
         btnDispP.setVisible(true);
@@ -490,6 +494,10 @@ public class Controller extends Application {
 //                    ((Stage) source.getScene().getWindow()).setScene(clienteScreen.makeScene());
                     ObservableList formas = FXCollections.observableArrayList(
                             "a 4 meses","a 20 meses","a Contado");
+                    btnAdd.setDisable(true);
+                    btnMod.setDisable(true);
+                    btnDel.setDisable(true);
+                    btnImp.setDisable(true);
                     cmbFormaPago.setValue("Escoger:");
                     cmbFormaPago.setItems(formas);
                     tabPaneM.getSelectionModel().select(tabForm);
@@ -1085,7 +1093,8 @@ public class Controller extends Application {
     //Agregar cliente
     public void addClient(){
     if(!checkObligatories()){
-        System.out.println("Ok");
+        addClients();
+
     }
     }
     //Cierra el formulario de agregar/modificar cliente
@@ -1157,4 +1166,68 @@ public class Controller extends Application {
     return fieldsBad;
 
     }
+    public void addClients(){
+        //Agregar
+        String estado = conectarSQL();
+        System.out.println(estado);
+        ResultSet clientRS;
+        PreparedStatement clientPS;
+        String clientQuery = "INSERT INTO clientes (ID_Nicho,Lado,AP_Paterno,AP_Materno,Nombre,Fecha_Apertura,Fecha_Liquidacion,Calle,Numero,Colonia, Ciudad,Codigo_Postal,Teléfono,Saldo,Ben1,Ben1_Par,Ben2,Ben2_Par,Forma_Pago) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+        try {
+            // Preparamos la consulta
+            clientPS = conexion.prepareStatement(clientQuery);
+            // Fijamos valores en la consulta con los valores que inserto el usuario.
+            clientPS.setString(1, txtNicho.getText());
+            clientPS.setString(2, "Prueba");
+            clientPS.setString(3, txtAP.getText());
+            clientPS.setString(4, txtAM.getText());
+            clientPS.setString(5, txtNombre.getText());
+            clientPS.setString(6, dateApertura.getValue().toString());
+            clientPS.setString(7, dateLiquidacion.getValue().toString());
+            clientPS.setString(8, txtCalle.getText());
+            clientPS.setString(9, txtNumero.getText());
+            clientPS.setString(10, txtColonia.getText());
+            clientPS.setString(11, txtCiudad.getText());
+            clientPS.setString(12, txtCP.getText());
+            clientPS.setString(13, txtTelefono.getText());
+            clientPS.setString(14, txtPrecio.getText());
+            clientPS.setString(15, txtNombreB1.getText());
+            clientPS.setString(16, txtP1.getText());
+            clientPS.setString(17, txtNombreB2.getText());
+            clientPS.setString(18, txtP2.getText());
+            clientPS.setString(19, cmbFormaPago.getValue().toString());
+
+            // Ejecutamos consulta
+            clientPS.executeQuery();
+            resultado = new Alert(Alert.AlertType.INFORMATION, "Se agregó satisfactoriamente. " );
+            txtNicho.clear();
+            txtAP.clear();
+            txtAM.clear();
+            txtNombre.clear();
+            dateApertura.setValue(null);
+            dateLiquidacion.setValue(null);
+            txtCalle.clear();
+            txtNumero.clear();
+            txtColonia.clear();
+            txtCiudad.clear();
+            txtCP.clear();
+            txtTelefono.clear();
+            txtPrecio.clear();
+            txtNombreB1.clear();
+            txtP1.clear();
+            txtNombreB2.clear();
+            txtP2.clear();
+            cmbFormaPago.getSelectionModel().clearSelection();
+            resultado.show();
+            //Limpiar
+
+
+        } catch (SQLException e) {
+            resultado = new Alert(Alert.AlertType.ERROR, "Error en la conexion: " + e.getMessage());
+            resultado.show();
+
+        }
+    }
 }
+
