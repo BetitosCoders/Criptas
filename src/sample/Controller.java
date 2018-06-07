@@ -35,7 +35,6 @@ import java.util.Optional;
 public class Controller extends Application {
     private static ConexionMySQL objConexion;
     private Alert resultado;
-    private Dialog about;
     private Connection conexion;
     private ObservableList<ObservableList> data;
     private Stage stage;
@@ -51,10 +50,11 @@ public class Controller extends Application {
     public static File doc;
     static List<String> clientData;
     static String docPath = null;
+    private boolean fieldsBad=false;
     @FXML
     TableView tabledata;
     @FXML
-    Tab tabpiedad, tabbuen_pastor, tabDisponibilidad, tabTabla;
+    Tab tabpiedad, tabbuen_pastor, tabDisponibilidad, tabTabla,tabForm;
     @FXML
     TextField txtUser;
     @FXML
@@ -62,16 +62,26 @@ public class Controller extends Application {
     @FXML
     BorderPane borderMain;
     @FXML
-    Button btnClientes, btnpiedad, btnPastor, btnPagos, btnDocumentos, btnAdd, btnMod, btnDel,btnImp;
+    Button btnClientes, btnpiedad, btnPastor, btnFinanzas, btnDocumentos, btnAdd, btnMod, btnDel,btnImp;
     @FXML
-    Button A1, A2;
+    Button btnDispP,btnDispBP;
     @FXML
     GridPane gridDisp, gridDisp2;
     @FXML
     private TabPane tabPaneM, tabPaneD;
+    @FXML
+    private Label tableLabel;
+    @FXML
+    private TextField txtNombre,txtAP,txtAM,txtCalle,txtNumero,txtColonia,txtCiudad,txtCP,txtTelefono,txtNicho,txtPrecio,txtNombreB1,txtP1,txtNombreB2,txtP2,txtNombreD,txtAPD,txtAMD;
+    @FXML
+     ComboBox cmbFormaPago;
+
+    @FXML
+    private DatePicker dateApertura,dateLiquidacion;
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.stage = primaryStage;
+
     }
 
     // La utlilizamos para pasar del login a la vista principal.
@@ -85,7 +95,9 @@ public class Controller extends Application {
             // Compara el usuario y la password con las credenciales en la base de datos.
             if (userCheck(txtUser.getText(), txtPass.getText())) {
                 Node source = (Node) ev.getSource();
+
                 switchScene("sample.fxml", source);
+
             } else {
                 resultado = new Alert(Alert.AlertType.ERROR, "Nombre de usuario o contraseña equivocada.");
                 resultado.show();
@@ -155,7 +167,29 @@ public class Controller extends Application {
         }
     }
 
+    //Abre tab de Disponibilidad y botones superiores
+    public void clickDisponibilidad(){
+        tabPaneM.getSelectionModel().select(tabDisponibilidad);
+        btnDispBP.setVisible(true);
+        btnDispP.setVisible(true);
+    }
 
+    //Funciona el botón filtrar en Finanzas
+    public void FiltrarFinanzas(){
+
+    }
+
+    //Cambia de tab según lado del botón
+    public void clickDispBP(){
+        tabPaneD.getSelectionModel().select(tabbuen_pastor);
+        tableLabel.setText("Buen Pastor");
+    }
+
+    //Cambia de tab según lado del botón
+    public void clickDispP(){
+        tabPaneD.getSelectionModel().select(tabpiedad);
+        tableLabel.setText("Piedad");
+    }
     /* EN LOS SIGUIENTE 6 CLICKS: */
     /* Fijamos que tabla estamos utilizando junto con su respectiva llave primaria y llamamos a un
     procedimiento almacenado en la base de datos dependiendo del boton al que se le dio click. */
@@ -163,6 +197,8 @@ public class Controller extends Application {
     la llave primaria para usar  al momento de eliminar. */
     /* Para llamar el procedimiento almacenado, se utiliza una funcion al cual se le manda
     * el nombre del procedimiento almacenado. */
+
+
     public void clickClientes() {
         btnAdd.setDisable(false);
         btnMod.setDisable(false);
@@ -171,7 +207,10 @@ public class Controller extends Application {
         tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "Clientes";
         currentId = "ID_Cliente";
+        tableLabel.setText("Clientes");
         callProcedure("{call showClients()}");
+        btnDispBP.setVisible(false);
+        btnDispP.setVisible(false);
     }
 
     public void clickpiedad() {
@@ -182,7 +221,10 @@ public class Controller extends Application {
         tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "piedad";
         currentId = "ID_Nicho";
+        tableLabel.setText("Piedad");
         callProcedure("{call showpiedad()}");
+        btnDispBP.setVisible(false);
+        btnDispP.setVisible(false);
     }
 
     public void clickBuenPastor() {
@@ -193,7 +235,10 @@ public class Controller extends Application {
         tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "buen_pastor";
         currentId = "ID_Nicho";
+        tableLabel.setText("Buen Pastor");
         callProcedure("{call showBuenPastor()}");
+        btnDispBP.setVisible(false);
+        btnDispP.setVisible(false);
     }
 
     public void clickPagos() {
@@ -204,7 +249,10 @@ public class Controller extends Application {
         tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "Pagos";
         currentId = "ID_Pago";
+        tableLabel.setText("Pagos");
         callProcedure("{call showPagos()}");
+        btnDispBP.setVisible(false);
+        btnDispP.setVisible(false);
     }
 
     public void clickDocumentos() {
@@ -215,7 +263,10 @@ public class Controller extends Application {
         tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "Documentos";
         currentId = "ID_Documentos";
+        tableLabel.setText("Documentos");
         callProcedure("{call showDocs()}");
+        btnDispBP.setVisible(false);
+        btnDispP.setVisible(false);
     }
 
     public void clickGastos() {
@@ -225,7 +276,10 @@ public class Controller extends Application {
         btnImp.setDisable(false);
         tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "Gastos";
+        tableLabel.setText("Gastos");
         callProcedure("{call showGastos()}");
+        btnDispBP.setVisible(false);
+        btnDispP.setVisible(false);
     }
 
     public void clickIngresos() {
@@ -235,9 +289,24 @@ public class Controller extends Application {
         btnImp.setDisable(false);
         tabPaneM.getSelectionModel().select(tabTabla);
         currentTable = "Ingresos";
+        tableLabel.setText("Ingresos");
         callProcedure("{call showIngresos()}");
+        btnDispBP.setVisible(false);
+        btnDispP.setVisible(false);
     }
 
+    public void clickFinanzas() {
+        btnAdd.setDisable(false);
+        btnMod.setDisable(false);
+        btnDel.setDisable(false);
+        btnImp.setDisable(false);
+        tabPaneM.getSelectionModel().select(tabTabla);
+        currentTable = "Ingresos";
+        tableLabel.setText("Finanzas");
+        callProcedure("{call showIngresos()}");
+        btnDispBP.setVisible(false);
+        btnDispP.setVisible(false);
+    }
     // Esta es la funcion que llama el procedimiento almacenado.
     private void callProcedure(String _procedure) {
         try {
@@ -267,6 +336,12 @@ public class Controller extends Application {
         // Agregamos Registros a una lista.
         addList(_tableRS);
         // Agregamos lista de registros a nuestra tabla.
+        tabledata.setColumnResizePolicy(new Callback<TableView.ResizeFeatures, Boolean>() {
+            @Override
+            public Boolean call(TableView.ResizeFeatures p) {
+                return true;
+            }
+        });
         tabledata.setItems(data);
     }
 
@@ -285,7 +360,7 @@ public class Controller extends Application {
                 // Fijamos el texto utilizando el conjunto de resultados.
                 col.setText(tableRS.getMetaData().getColumnName(i + 1));
                 // Cambiamos la anchura por estetica.
-                col.setMinWidth(150);
+
                 // Esto nos permite manipular celdas dentro de la columna que insertamos.
                 col.setCellValueFactory((Callback<TableColumn.CellDataFeatures<ObservableList, String>, ObservableValue<String>>) param -> new SimpleStringProperty(param.getValue().get(j).toString()));
                 // Finalmente agregamos nuestra columna a nuestra tabla.
@@ -405,14 +480,19 @@ public class Controller extends Application {
             // Revisamos que tabla esta seleccionada.
             switch (currentTable) {
                 case "Clientes": {
-                    // Se fijan campos a insertar y sus nombres a mostrar.
-                    optionalEntries = new String[]{"Beneficicario 2", "Parentesco de Beneficiario 2", "Limite de Credito"};
-                    requiredEntries = new String[]{"Nombre", "Apellido Paterno", "Apellido Materno", "Nicho", "Lado", "Saldo", "Dirección", "Telefono", "Fecha de Inscripción", "Benficiario 1", "Parentesco de Beneficiario 1"};
-                    otherTableEntries = new String[]{"Nombre del Difunto", "Apellido Paterno del Difunto", "Apellido Materno del Difunto"};
-                    // Se crea una pantalla para insertar y se muestra dicha pantalla.
-                    AddScreen clienteScreen = new AddScreen(17, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
-                    Node source = (Node) ev.getSource();
-                    ((Stage) source.getScene().getWindow()).setScene(clienteScreen.makeScene());
+//                    // Se fijan campos a insertar y sus nombres a mostrar.
+//                    optionalEntries = new String[]{"Beneficicario 2", "Parentesco de Beneficiario 2", "Limite de Credito"};
+//                    requiredEntries = new String[]{"Nombre", "Apellido Paterno", "Apellido Materno", "Nicho", "Lado", "Saldo", "Dirección", "Telefono", "Fecha de Inscripción", "Benficiario 1", "Parentesco de Beneficiario 1"};
+//                    otherTableEntries = new String[]{"Nombre del Difunto", "Apellido Paterno del Difunto", "Apellido Materno del Difunto"};
+//                    // Se crea una pantalla para insertar y se muestra dicha pantalla.
+//                    AddScreen clienteScreen = new AddScreen(17, optionalEntries, requiredEntries, currentTable, objConexion, otherTableEntries);
+//                    Node source = (Node) ev.getSource();
+//                    ((Stage) source.getScene().getWindow()).setScene(clienteScreen.makeScene());
+                    ObservableList formas = FXCollections.observableArrayList(
+                            "a 4 meses","a 20 meses","a Contado");
+                    cmbFormaPago.setValue("Escoger:");
+                    cmbFormaPago.setItems(formas);
+                    tabPaneM.getSelectionModel().select(tabForm);
                     break;
                 }
                 case "Pagos": {
@@ -609,11 +689,11 @@ public class Controller extends Application {
                 switch (statusar[number]!=null ? statusar[number] : "Libre") {
                     //Si es ocupado el estado usa el estilo buttonfree
                     case "Ocupado":
-                        button[number].getStyleClass().add("buttonfree");
+                        button[number].getStyleClass().add("buttonused");
                         break;
                     //Si es libre el estado usa buttonused
                     case "Libre":
-                        button[number].getStyleClass().add("buttonused");
+                        button[number].getStyleClass().add("buttonfree");
                         break;
                 }
                 //define la medida de los botones
@@ -670,11 +750,11 @@ public class Controller extends Application {
                 switch (statusar[number]!=null ? statusar[number] : "Libre") {
                     //Si es ocupado el estado usa el estilo buttonfree
                     case "Ocupado":
-                        button[number].getStyleClass().add("buttonfree");
+                        button[number].getStyleClass().add("buttonused");
                         break;
                     //Si es libre el estado usa buttonused
                     case "Libre":
-                        button[number].getStyleClass().add("buttonused");
+                        button[number].getStyleClass().add("buttonfree");
                         break;
                 }
                 //define la medida de los botones
@@ -796,7 +876,7 @@ public class Controller extends Application {
                         clientData.add(clients.getString("Ben1_Par"));
                         clientData.add(clients.getString("Ben2"));
                         clientData.add(clients.getString("Ben2_Par"));
-                        clientData.add(clients.getString("Lim_Credito"));
+                        clientData.add(clients.getString("Forma_Pago"));
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -999,6 +1079,82 @@ public class Controller extends Application {
         dialog.initStyle(StageStyle.UTILITY);
         dialog.setScene(scene);
         dialog.showAndWait();
+
+    }
+
+    //Agregar cliente
+    public void addClient(){
+    if(!checkObligatories()){
+        System.out.println("Ok");
+    }
+    }
+    //Cierra el formulario de agregar/modificar cliente
+    public void Cancel(){
+        clickClientes();
+    }
+    public boolean checkObligatories(){
+       // txtNombre,txtAP,txtAM,txtCalle,txtNumero,txtColonia,txtCiudad,txtCP,txtTelefono,txtNicho,txtPrecio,txtNombreB1,txtP1,txtNombreB2,txtP2,txtNombreD,txtAPD,txtAMD
+   String[] requiredFields=new String[]{txtNombre.getText(),txtAP.getText(),txtAM.getText(),
+                            txtTelefono.getText(),txtNicho.getText(),txtPrecio.getText(),
+                            txtNombreB1.getText(),txtP1.getText(),
+                            txtNombreB2.getText(),txtP2.getText()};
+
+
+        for (int i=0; i<requiredFields.length; i++) {
+        if (requiredFields[i].isEmpty()){
+            resultado = new Alert(Alert.AlertType.ERROR, "Hay un campo obligatorio vacío.");
+            resultado.show();
+            fieldsBad=true;
+            break;
+        }else{
+
+            if (!txtPrecio.getText().matches("^[0-9]+([,.][0-9]+)?$")) {
+                resultado = new Alert(Alert.AlertType.ERROR, "En el campo Precio hay caracteres que no son numeros enteros o decimales.");
+                resultado.show();
+                fieldsBad=true;
+                break;
+            }else {
+                fieldsBad=false;
+            }
+            if(cmbFormaPago.getValue().equals("Escoger:")){
+                resultado = new Alert(Alert.AlertType.ERROR, "No se escogió forma de pago.");
+                resultado.show();
+                fieldsBad=true;
+                break;
+            }else{
+                fieldsBad=false;
+            }
+        }
+        }
+
+
+        if(!txtNumero.getText().isEmpty()){
+            if (!txtNumero.getText().matches("[0-9]+")) {
+                resultado = new Alert(Alert.AlertType.ERROR, "En el campo número hay caracteres que no son numeros.");
+                resultado.show();
+                fieldsBad=true;
+            }else{
+                fieldsBad=false;
+            }
+        }
+        if(!txtCP.getText().isEmpty()){
+            if (!txtCP.getText().matches("[0-9]+")) {
+                resultado = new Alert(Alert.AlertType.ERROR, "En el campo Código Postal hay caracteres que no son numeros.");
+                resultado.show();
+                fieldsBad=true;
+            }else{
+                fieldsBad=false;
+            }
+
+        }
+        if(dateApertura.getValue() ==null){
+            resultado = new Alert(Alert.AlertType.ERROR, "La fecha apertura esta vacia.");
+            resultado.show();
+            fieldsBad=true;
+        }else{
+            fieldsBad=false;
+        }
+    return fieldsBad;
 
     }
 }
