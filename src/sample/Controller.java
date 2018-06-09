@@ -24,11 +24,10 @@ import net.sf.jasperreports.engine.JRException;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,24 +36,21 @@ public class Controller extends Application {
     private Alert resultado;
     private Connection conexion;
     private ObservableList<ObservableList> data;
-    private Stage stage;
     private Scene scene;
     private int number;
     private String[] numb = new String[196];
-    private int cont;
     private String[] t = new String[200];
     private String nombre;
-    public static String currentTable;
-    private String currentId;
+    static String currentTable;
+    private String currentId, myId;
     private String tableinTab, status, type;
-    public static File doc;
+    static File doc;
     static List<String> clientData;
     static String docPath = null;
-    private boolean fieldsBad=false;
     @FXML
     TableView tabledata;
     @FXML
-    Tab tabpiedad, tabbuen_pastor, tabDisponibilidad, tabTabla,tabForm;
+    Tab tabpiedad, tabbuen_pastor, tabDisponibilidad, tabTabla, tabForm;
     @FXML
     TextField txtUser;
     @FXML
@@ -62,9 +58,9 @@ public class Controller extends Application {
     @FXML
     BorderPane borderMain;
     @FXML
-    Button btnClientes, btnpiedad, btnPastor, btnFinanzas, btnDocumentos, btnAdd, btnMod, btnDel,btnImp;
+    Button btnClientes, btnpiedad, btnPastor, btnFinanzas, btnDocumentos, btnAdd, btnMod, btnDel, btnImp;
     @FXML
-    Button btnDispP,btnDispBP;
+    Button btnDispP, btnDispBP;
     @FXML
     GridPane gridDisp, gridDisp2;
     @FXML
@@ -72,15 +68,20 @@ public class Controller extends Application {
     @FXML
     private Label tableLabel;
     @FXML
-    private TextField txtNombre,txtAP,txtAM,txtCalle,txtNumero,txtColonia,txtCiudad,txtCP,txtTelefono,txtNicho,txtPrecio,txtNombreB1,txtP1,txtNombreB2,txtP2,txtNombreD,txtAPD,txtAMD;
+    private TextField txtNombre, txtAP, txtAM, txtCalle, txtNumero, txtColonia, txtCiudad, txtCP, txtTelefono, txtPrecio, txtNombreB1, txtP1, txtNombreB2, txtP2, txtNombreD, txtAPD, txtAMD;
     @FXML
-     ComboBox cmbFormaPago;
+    ComboBox cmbFormaPago, cmbLado,cmbNicho;
+    @FXML
+    private CheckBox checkDepositado;
+    String ladoCliente;
+    String nullString = null;
 
     @FXML
-    private DatePicker dateApertura,dateLiquidacion;
+    private DatePicker dateApertura, dateLiquidacion;
+
     @Override
     public void start(Stage primaryStage) {
-        this.stage = primaryStage;
+        Stage stage = primaryStage;
 
     }
 
@@ -111,7 +112,7 @@ public class Controller extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneName));
             parent = loader.load();
-            scene=new Scene(parent,1280,700);
+            scene = new Scene(parent, 1280, 700);
             ((Stage) source.getScene().getWindow()).setScene(scene);
             scene.getWindow().centerOnScreen();
         } catch (IOException e) {
@@ -123,7 +124,7 @@ public class Controller extends Application {
     private String conectarSQL() {
         String estado = null;
         /* Guardamos el objeto de la conexion como la conexion en si porque
-        * mas adelante necesitamos ambos. */
+         * mas adelante necesitamos ambos. */
 //        objConexion = new ConexionMySQL("u5818148_carlos", "=jkst[RHJunx", "u5818148_criptas", "62.210.247.90", 3306);
         objConexion = new ConexionMySQL("root", "devpass9", "criptas", "localhost", 3306);
         try {
@@ -168,7 +169,7 @@ public class Controller extends Application {
     }
 
     //Abre tab de Disponibilidad y botones superiores
-    public void clickDisponibilidad(){
+    public void clickDisponibilidad() {
         btnAdd.setDisable(true);
         btnMod.setDisable(true);
         btnDel.setDisable(true);
@@ -179,18 +180,18 @@ public class Controller extends Application {
     }
 
     //Funciona el botón filtrar en Finanzas
-    public void FiltrarFinanzas(){
+    public void FiltrarFinanzas() {
 
     }
 
     //Cambia de tab según lado del botón
-    public void clickDispBP(){
+    public void clickDispBP() {
         tabPaneD.getSelectionModel().select(tabbuen_pastor);
         tableLabel.setText("Buen Pastor");
     }
 
     //Cambia de tab según lado del botón
-    public void clickDispP(){
+    public void clickDispP() {
         tabPaneD.getSelectionModel().select(tabpiedad);
         tableLabel.setText("Piedad");
     }
@@ -200,7 +201,7 @@ public class Controller extends Application {
     /* Se registra la tabla para usar al momento de insertar y
     la llave primaria para usar  al momento de eliminar. */
     /* Para llamar el procedimiento almacenado, se utiliza una funcion al cual se le manda
-    * el nombre del procedimiento almacenado. */
+     * el nombre del procedimiento almacenado. */
 
 
     public void clickClientes() {
@@ -311,6 +312,7 @@ public class Controller extends Application {
         btnDispBP.setVisible(false);
         btnDispP.setVisible(false);
     }
+
     // Esta es la funcion que llama el procedimiento almacenado.
     private void callProcedure(String _procedure) {
         try {
@@ -381,8 +383,8 @@ public class Controller extends Application {
         try {
             // Utilizamos el conjunto de resultados que recibimos.
             while (tableRS.next()) {
-                    /* Se crea una lista para poder juntar todas las columnas
-                    * de una fila en un solo registro. */
+                /* Se crea una lista para poder juntar todas las columnas
+                 * de una fila en un solo registro. */
                 ObservableList<String> row = FXCollections.observableArrayList();
                 for (int i = 1; i <= tableRS.getMetaData().getColumnCount(); i++) {
                     if (tableRS.getString(i) != null) {
@@ -467,7 +469,7 @@ public class Controller extends Application {
     // Se obtiene el identificador de cierto registro para poder borrar.
     private int getID() {
         String selection = tabledata.getSelectionModel().getSelectedItems().get(0).toString();
-        selection = selection.replace('[',' ').trim();
+        selection = selection.replace('[', ' ').trim();
         String splitSelection[] = selection.split(",");
         return Integer.parseInt(splitSelection[0]);
     }
@@ -477,8 +479,8 @@ public class Controller extends Application {
         // Revisa que este seleccionada una tabla para insertar en ella.
         if (!currentTable.isEmpty()) {
             /* Se crean variables para saber los datos necesarios para insertar.
-            * Uno para campos obligatorios, otro para los opcionales y aun otro
-            * para los nombres que se le mostrara al usuario. */
+             * Uno para campos obligatorios, otro para los opcionales y aun otro
+             * para los nombres que se le mostrara al usuario. */
             String[] optionalEntries;
             String[] requiredEntries, otherTableEntries;
             // Revisamos que tabla esta seleccionada.
@@ -493,13 +495,15 @@ public class Controller extends Application {
 //                    Node source = (Node) ev.getSource();
 //                    ((Stage) source.getScene().getWindow()).setScene(clienteScreen.makeScene());
                     ObservableList formas = FXCollections.observableArrayList(
-                            "a 4 meses","a 20 meses","a Contado");
+                            "a 4 meses", "a 20 meses", "a Contado");
+                    ObservableList lados = FXCollections.observableArrayList(
+                            "Buen Pastor", "Piedad");
                     btnAdd.setDisable(true);
                     btnMod.setDisable(true);
                     btnDel.setDisable(true);
                     btnImp.setDisable(true);
-                    cmbFormaPago.setValue("Escoger:");
                     cmbFormaPago.setItems(formas);
+                    cmbLado.setItems(lados);
                     tabPaneM.getSelectionModel().select(tabForm);
                     break;
                 }
@@ -511,15 +515,15 @@ public class Controller extends Application {
                 case "Documentos": {
                     // Se utiliza una funcion declarada mas adelante para obtener el cliente que va a pagar.
                     /* Se le muestra una pantalla al usuario para que elija el documento que quiere guardar.
-                    * La pantalla solo permite elegir archivos pdf o imagenes. */
+                     * La pantalla solo permite elegir archivos pdf o imagenes. */
                     FileChooser docChoose = new FileChooser();
                     Node source = (Node) ev.getSource();
                     docChoose.setTitle("Eliga el documento a insertar.");
                     docChoose.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivo PDF", "*.pdf"));
                     docChoose.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imagen", "*.jpg", "*.jpeg", "*.png"));
                     /* Se obtiene el archivo elegido y se guarda una copia en la carpeta del proyecto.
-                    * El archivo se guarda con el nombre del cliente, el nicho y la fecha y hora para
-                    * nombre iguales. */
+                     * El archivo se guarda con el nombre del cliente, el nicho y la fecha y hora para
+                     * nombre iguales. */
                     doc = docChoose.showOpenDialog(source.getScene().getWindow());
                     // Se revisa que se eligio un cliente.
                     // Se fijan campos a insertar y sus nombres a mostrar.
@@ -629,27 +633,29 @@ public class Controller extends Application {
         if (b != null) {
             String btext = b.getText();
             //TabPaneM.getSelectionModel().select(tabTabla);
-            int x=0;
-            for (int i = 0; i<numb.length; i++) {
-            if(numb[i].equals(btext)) {
+            int x = 0;
+            for (int i = 0; i < numb.length; i++) {
+                if (numb[i].equals(btext)) {
 
-                if(tabPaneD.getSelectionModel().isSelected(1)) {
-                    clickpiedad();
-                    tabledata.getSelectionModel().select(i);
-                    tabPaneM.getSelectionModel().select(tabTabla);
-                    tabledata.scrollTo(i);
-                }
+                    if (tabPaneD.getSelectionModel().isSelected(1)) {
+                        clickpiedad();
+                        tabledata.getSelectionModel().select(i);
+                        tabPaneM.getSelectionModel().select(tabTabla);
+                        tabledata.scrollTo(i);
+                    }
 
                     x = (i * 4);
 
-                if(tabPaneD.getSelectionModel().isSelected(0)) {
-                    clickBuenPastor();
-                    tabledata.getSelectionModel().select(x);
-                    tabPaneM.getSelectionModel().select(tabTabla);
-                    tabledata.scrollTo(x);
+                    if (tabPaneD.getSelectionModel().isSelected(0)) {
+                        clickBuenPastor();
+                        tabledata.getSelectionModel().select(x);
+                        tabPaneM.getSelectionModel().select(tabTabla);
+                        tabledata.scrollTo(x);
 
 
-                }}}
+                    }
+                }
+            }
 
 
         }
@@ -657,10 +663,10 @@ public class Controller extends Application {
 
     //Crea los botones de piedad en el gridpane
     public void loadStatus() {
-        String[] statusar=new String[200];
-        String[] t=new String[200];
-        String[] typear=new String[200];
-        int cont=0;
+        String[] statusar = new String[200];
+        String[] t = new String[200];
+        String[] typear = new String[200];
+        int cont = 0;
         Button[] button = new Button[200];
         //Espacio entre los botones
         gridDisp.setPadding(new Insets(5));
@@ -668,13 +674,13 @@ public class Controller extends Application {
         gridDisp.setVgap(5);
         //For para crear el texto de los botones
         for (char alphabet = 'A'; alphabet <= 'N'; alphabet++) {
-            for(int i=1;i<=14;i++) {
+            for (int i = 1; i <= 14; i++) {
                 //en este arreglo se guarda el nombre de los botones
                 t[cont] = alphabet + Integer.toString(i);
                 //Obtiene el estado de ese botón
-                statusar[cont]=getStatus(t[cont]);
+                statusar[cont] = getStatus(t[cont]);
                 //Obtiene el tipo de ese botón
-                typear[cont]=getType(t[cont]);
+                typear[cont] = getType(t[cont]);
                 cont++;
             }
         }
@@ -684,9 +690,9 @@ public class Controller extends Application {
                 //Calcula el numero del botón
                 number = 14 * r + c;
                 //Crea el botón
-                button[number] =new Button(t[number]);
-                numb[number]=t[number];
-                switch (typear[number]){
+                button[number] = new Button(t[number]);
+                numb[number] = t[number];
+                switch (typear[number]) {
                     //Si es imagen el tipo le añade el estilo buttonbold
                     case "Imagen":
                         button[number].getStyleClass().add("buttonbold");
@@ -694,7 +700,7 @@ public class Controller extends Application {
 
                 }
 
-                switch (statusar[number]!=null ? statusar[number] : "Libre") {
+                switch (statusar[number] != null ? statusar[number] : "Libre") {
                     //Si es ocupado el estado usa el estilo buttonfree
                     case "Ocupado":
                         button[number].getStyleClass().add("buttonused");
@@ -705,8 +711,8 @@ public class Controller extends Application {
                         break;
                 }
                 //define la medida de los botones
-                button[number].setPrefSize(50,50);
-                button[number].setOnAction(event -> checkSpace(event,number));
+                button[number].setPrefSize(50, 50);
+                button[number].setOnAction(event -> checkSpace(event, number));
                 //añade el botón al grid
                 gridDisp.add(button[number], c, r);
                 //Accion del botón
@@ -719,9 +725,9 @@ public class Controller extends Application {
     //Crea los botones de buen pastor en el gridpane
     public void loadStatusBP() {
 
-        String[] statusar=new String[200];
-        String[] typear=new String[200];
-        cont=0;
+        String[] statusar = new String[200];
+        String[] typear = new String[200];
+        int cont = 0;
         Button[] button = new Button[200];
         //Espacio entre los botones
         gridDisp2.setPadding(new Insets(5));
@@ -729,13 +735,13 @@ public class Controller extends Application {
         gridDisp2.setVgap(5);
         //For para crear el texto de los botones
         for (char alphabet = 'A'; alphabet <= 'N'; alphabet++) {
-            for(int i=1;i<=14;i++) {
+            for (int i = 1; i <= 14; i++) {
                 //en este arreglo se guarda el nombre de los botones
                 t[cont] = alphabet + Integer.toString(i);
                 //Obtiene el estado de ese botón
-                statusar[cont]=getStatus(t[cont]);
+                statusar[cont] = getStatus(t[cont]);
                 //Obtiene el tipo de ese botón
-                typear[cont]=getType(t[cont]);
+                typear[cont] = getType(t[cont]);
                 cont++;
             }
         }
@@ -743,11 +749,11 @@ public class Controller extends Application {
         for (int r = 0; r < 14; r++) {
             for (int c = 0; c < 14; c++) {
                 //Calcula el numero del botón
-                 number = 14 * r + c;
+                number = 14 * r + c;
                 //Crea el botón
-                button[number] =new Button(t[number]);
-                numb[number]=t[number];
-                switch (typear[number]){
+                button[number] = new Button(t[number]);
+                numb[number] = t[number];
+                switch (typear[number]) {
                     //Si es imagen el tipo le añade el estilo buttonbold
                     case "Imagen":
                         button[number].getStyleClass().add("buttonbold");
@@ -755,7 +761,7 @@ public class Controller extends Application {
 
                 }
 
-                switch (statusar[number]!=null ? statusar[number] : "Libre") {
+                switch (statusar[number] != null ? statusar[number] : "Libre") {
                     //Si es ocupado el estado usa el estilo buttonfree
                     case "Ocupado":
                         button[number].getStyleClass().add("buttonused");
@@ -766,8 +772,8 @@ public class Controller extends Application {
                         break;
                 }
                 //define la medida de los botones
-                button[number].setPrefSize(50,50);
-                button[number].setOnAction(event -> checkSpace(event,number));
+                button[number].setPrefSize(50, 50);
+                button[number].setOnAction(event -> checkSpace(event, number));
 
                 //añade el botón al grid
                 gridDisp2.add(button[number], c, r);
@@ -778,32 +784,32 @@ public class Controller extends Application {
     }
 
     //Obtiene el estado del nicho para poder marcarlo ocupado o libre
-    private String getStatus(String id){
+    private String getStatus(String id) {
 
-        try{
-            if(tableinTab.equals("piedad")) {
+        try {
+            if (tableinTab.equals("piedad")) {
 
                 ResultSet c = objConexion.consultar("SELECT Estado FROM " + tableinTab + " WHERE ID_Nicho='" + id + "';");
                 while (c.next()) {
                     status = c.getString("Estado");
 
 
-
-                }}
-                if (tableinTab.equals("buen_pastor")) {
-
-                    List<String> list = new ArrayList<>();
-                    ResultSet c = objConexion.consultar("SELECT estado FROM buen_pastor where id_nicho LIKE '"+id+"__' group by estado having count(*) >= 4;");
-                    while (c.next()) {
-                        status=c.getString("estado");
-
-                    }
-                    return status;
                 }
+            }
+            if (tableinTab.equals("buen_pastor")) {
+
+                List<String> list = new ArrayList<>();
+                ResultSet c = objConexion.consultar("SELECT estado FROM buen_pastor where id_nicho LIKE '" + id + "__' group by estado having count(*) >= 4;");
+                while (c.next()) {
+                    status = c.getString("estado");
+
+                }
+                return status;
+            }
 
 
-        }catch (Exception e){
-            resultado = new Alert(Alert.AlertType.ERROR,"No funciona la parte del estado" );
+        } catch (Exception e) {
+            resultado = new Alert(Alert.AlertType.ERROR, "No funciona la parte del estado");
             resultado.show();
         }
 
@@ -811,45 +817,45 @@ public class Controller extends Application {
     }
 
     //Obtiene el tipo de nicho que es para marcarlo diferente
-    private String getType(String id){
-        try{
-            if(tableinTab.equals("piedad")){
+    private String getType(String id) {
+        try {
+            if (tableinTab.equals("piedad")) {
 
-                ResultSet c = objConexion.consultar("SELECT Tipo_Nicho FROM piedad WHERE ID_Nicho='"+id+"';");
+                ResultSet c = objConexion.consultar("SELECT Tipo_Nicho FROM piedad WHERE ID_Nicho='" + id + "';");
                 while (c.next()) {
                     type = c.getString("Tipo_Nicho");
                 }
             }
-            if(tableinTab.equals("buen_pastor")){
+            if (tableinTab.equals("buen_pastor")) {
 
-                ResultSet c = objConexion.consultar("SELECT Tipo_Nicho FROM buen_pastor WHERE ID_Nicho='"+id+"-1';");
+                ResultSet c = objConexion.consultar("SELECT Tipo_Nicho FROM buen_pastor WHERE ID_Nicho='" + id + "-1';");
                 while (c.next()) {
                     type = c.getString("Tipo_Nicho");
 
                 }
             }
 
-        }catch (Exception e){
-            resultado = new Alert(Alert.AlertType.ERROR,"No funciona la parte del tipo" );
+        } catch (Exception e) {
+            resultado = new Alert(Alert.AlertType.ERROR, "No funciona la parte del tipo");
             resultado.show();
         }
         return type;
     }
 
     //Checa cual pestaña esta seleccionada y carga los botones de disponiblidad
-    public void checkTab(){
-        if(tabPaneD.getSelectionModel().getSelectedItem()==tabpiedad) {
-            tableinTab="piedad";
+    public void checkTab() {
+        if (tabPaneD.getSelectionModel().getSelectedItem() == tabpiedad) {
+            tableinTab = "piedad";
             loadStatus();
         }
-        if(tabPaneD.getSelectionModel().getSelectedItem()==tabbuen_pastor) {
-            tableinTab="buen_pastor";
+        if (tabPaneD.getSelectionModel().getSelectedItem() == tabbuen_pastor) {
+            tableinTab = "buen_pastor";
             loadStatusBP();
         }
     }
 
     //Muestra el reporte segun la tabla cuando le das imprimir
-    public void showReport(){
+    public void showReport() {
         try {
             System.out.println(currentTable);
             new JavaCallJasperReport(currentTable);
@@ -865,7 +871,7 @@ public class Controller extends Application {
     //Se usa en modificar para obtener la información de la tabla en los textfields
     private void getClientInfoTable() {
         switch (currentTable) {
-            case "Clientes" : {
+            case "Clientes": {
                 String queryClients = "SELECT * FROM Clientes WHERE ID_Cliente=" + getID();
                 ResultSet clients = objConexion.consultar(queryClients);
                 clientData.clear();
@@ -897,7 +903,7 @@ public class Controller extends Application {
                 String queryDif = "SELECT * FROM " + lado + " WHERE ID_Nicho='" + clientData.get(3) + "'";
                 ResultSet dif = objConexion.consultar(queryDif);
                 try {
-                    while(dif.next()) {
+                    while (dif.next()) {
                         clientData.add(dif.getString("Nombre_Dif"));
                         clientData.add(dif.getString("AP_Pat_Dif"));
                         clientData.add(dif.getString("AP_Mat_Dif"));
@@ -907,7 +913,7 @@ public class Controller extends Application {
                 }
                 break;
             }
-            case "Pagos" : {
+            case "Pagos": {
                 String queryPagos = "SELECT * FROM Pagos WHERE ID_Pago=" + getID();
                 ResultSet pagos = objConexion.consultar(queryPagos);
                 clientData.clear();
@@ -924,7 +930,7 @@ public class Controller extends Application {
                     e.printStackTrace();
                 }
                 String queryClients = "SELECT ID_Cliente, Nombre, AP_Paterno, AP_Materno FROM Clientes";
-                ResultSet clients=objConexion.consultar(queryClients);
+                ResultSet clients = objConexion.consultar(queryClients);
                 try {
                     while (clients.next()) {
                         if (clients.getString("ID_Cliente").equals(idClient)) {
@@ -932,8 +938,7 @@ public class Controller extends Application {
                                     clients.getString("Nombre") + " " +
                                     clients.getString("AP_Paterno") + " " +
                                     clients.getString("AP_Materno") + "*");
-                        }
-                        else {
+                        } else {
                             clientData.add(clients.getString("ID_Cliente") + ": " +
                                     clients.getString("Nombre") + " " +
                                     clients.getString("AP_Paterno") + " " +
@@ -945,12 +950,12 @@ public class Controller extends Application {
                 }
                 break;
             }
-            case "Gastos":{
-                String queryGastos="SELECT * FROM Gastos WHERE ID_Gasto=" + getID();
-                ResultSet gastos=objConexion.consultar(queryGastos);
+            case "Gastos": {
+                String queryGastos = "SELECT * FROM Gastos WHERE ID_Gasto=" + getID();
+                ResultSet gastos = objConexion.consultar(queryGastos);
                 clientData.clear();
                 try {
-                    while (gastos.next()){
+                    while (gastos.next()) {
                         clientData.add(gastos.getString("Descripción"));
                         clientData.add(gastos.getString("Monto"));
                         clientData.add(gastos.getString("Fecha"));
@@ -960,12 +965,12 @@ public class Controller extends Application {
                 }
                 break;
             }
-            case "Ingresos":{
-                String queryGastos="SELECT * FROM Ingresos WHERE ID_Ingreso=" + getID();
-                ResultSet gastos=objConexion.consultar(queryGastos);
+            case "Ingresos": {
+                String queryGastos = "SELECT * FROM Ingresos WHERE ID_Ingreso=" + getID();
+                ResultSet gastos = objConexion.consultar(queryGastos);
                 clientData.clear();
                 try {
-                    while (gastos.next()){
+                    while (gastos.next()) {
                         clientData.add(gastos.getString("Descripción"));
                         clientData.add(gastos.getString("Monto"));
                         clientData.add(gastos.getString("Fecha"));
@@ -975,7 +980,7 @@ public class Controller extends Application {
                 }
                 break;
             }
-            case "Documentos":{
+            case "Documentos": {
                 String queryDocs = "SELECT * FROM Documentos WHERE ID_Documentos=" + getID();
                 ResultSet Docs = objConexion.consultar(queryDocs);
                 clientData.clear();
@@ -990,7 +995,7 @@ public class Controller extends Application {
                     e.printStackTrace();
                 }
                 String queryClients = "SELECT ID_Cliente, Nombre, AP_Paterno, AP_Materno FROM Clientes";
-                ResultSet clients=objConexion.consultar(queryClients);
+                ResultSet clients = objConexion.consultar(queryClients);
                 try {
                     while (clients.next()) {
                         if (clients.getString("ID_Cliente").equals(idClient)) {
@@ -998,8 +1003,7 @@ public class Controller extends Application {
                                     clients.getString("Nombre") + " " +
                                     clients.getString("AP_Paterno") + " " +
                                     clients.getString("AP_Materno") + "*");
-                        }
-                        else {
+                        } else {
                             clientData.add(clients.getString("ID_Cliente") + ": " +
                                     clients.getString("Nombre") + " " +
                                     clients.getString("AP_Paterno") + " " +
@@ -1015,7 +1019,7 @@ public class Controller extends Application {
     }
 
     //Abre ventana de modificar
-    public void modify(ActionEvent ev){
+    public void modify(ActionEvent ev) {
         String[] optionalEntries;
         String[] requiredEntries, otherTableEntries;
         if (isSelected()) {
@@ -1024,7 +1028,7 @@ public class Controller extends Application {
                     getClientInfoTable();
                     optionalEntries = new String[]{"Beneficicario 2", "Parentesco de Beneficiario 2", "Limite de Credito"};
                     requiredEntries = new String[]{"Nombre", "Apellido Paterno", "Apellido Materno", "Nicho", "Lado", "Saldo", "Dirección", "Telefono", "Fecha de Inscripcion", "Benficiario 1", "Parentesco de Beneficiario 1"};
-                    otherTableEntries = new String[] {"Nombre del Difunto", "Apellido Paterno del Difunto", "Apellido Materno del Difunto"};
+                    otherTableEntries = new String[]{"Nombre del Difunto", "Apellido Paterno del Difunto", "Apellido Materno del Difunto"};
                     ModScreen modify = new ModScreen(requiredEntries, optionalEntries, otherTableEntries, 17, currentTable, objConexion, getID() + "");
                     Node source = (Node) ev.getSource();
                     ((Stage) source.getScene().getWindow()).setScene(modify.makeScene());
@@ -1071,8 +1075,7 @@ public class Controller extends Application {
                     break;
                 }
             }
-        }
-        else {
+        } else {
             resultado = new Alert(Alert.AlertType.INFORMATION, "Eliga el registro a modificar.");
             resultado.show();
         }
@@ -1082,126 +1085,286 @@ public class Controller extends Application {
     public void runAbout() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("about.fxml"));
         Parent parent = loader.load();
-        scene=new Scene(parent,600,291);
+        scene = new Scene(parent, 600, 291);
         Stage dialog = new Stage();
         dialog.initStyle(StageStyle.UTILITY);
         dialog.setScene(scene);
         dialog.showAndWait();
 
     }
+    public void sideSelected(){
+        conectarSQL();
+        cmbNicho.getItems().clear();
+        ResultSet nichosRS;
+        PreparedStatement nichosPS;
+        List<String> results = new ArrayList<String>();
+        results.clear();
+        if(cmbLado.getValue().toString().equals("Buen Pastor")){
+            cmbNicho.setValue("");
+            cmbNicho.setDisable(false);
+          String nichosQuery = "SELECT ID_Nicho from Buen_Pastor";
+          try {
+              // Preparamos la consulta
+              nichosPS = conexion.prepareStatement(nichosQuery);
 
+              // Ejecutamos consulta
+              nichosRS = nichosPS.executeQuery();
+
+              while (nichosRS.next()) {
+                  results.add(nichosRS.getString("ID_Nicho"));
+              }
+              ObservableList nichos = FXCollections.observableArrayList(
+                      results);
+              cmbNicho.setItems(nichos);
+              new AutoCompleteComboBoxListener<>(cmbNicho);
+      } catch (SQLException e) {
+              resultado = new Alert(Alert.AlertType.ERROR, "Error en la conexion: " + e.getMessage());
+              resultado.show();
+
+          }
+        }
+      if(cmbLado.getValue().toString().equals("Piedad")){
+          cmbNicho.setValue("");
+          cmbNicho.setDisable(false);
+          String nichosQuery = "SELECT ID_Nicho from Piedad";
+          try {
+              // Preparamos la consulta
+              nichosPS = conexion.prepareStatement(nichosQuery);
+
+              // Ejecutamos consulta
+              nichosRS = nichosPS.executeQuery();
+
+              while (nichosRS.next()) {
+                  results.add(nichosRS.getString("ID_Nicho"));
+              }
+              ObservableList nichos = FXCollections.observableArrayList(
+                      results);
+              cmbNicho.setItems(nichos);
+              new AutoCompleteComboBoxListener<>(cmbNicho);
+          } catch (SQLException e) {
+              resultado = new Alert(Alert.AlertType.ERROR, "Error en la conexion: " + e.getMessage());
+              resultado.show();
+
+          }
+      }
+    }
     //Agregar cliente
-    public void addClient(){
-    if(!checkObligatories()){
-        addClients();
-
+    public void addClient() {
+        if (!checkObligatories()) {
+            addClients();
+        }
     }
-    }
-    //Cierra el formulario de agregar/modificar cliente
-    public void Cancel(){
-        clickClientes();
-    }
-    public boolean checkObligatories(){
-       // txtNombre,txtAP,txtAM,txtCalle,txtNumero,txtColonia,txtCiudad,txtCP,txtTelefono,txtNicho,txtPrecio,txtNombreB1,txtP1,txtNombreB2,txtP2,txtNombreD,txtAPD,txtAMD
-   String[] requiredFields=new String[]{txtNombre.getText(),txtAP.getText(),txtAM.getText(),
-                            txtTelefono.getText(),txtNicho.getText(),txtPrecio.getText(),
-                            txtNombreB1.getText(),txtP1.getText(),
-                            txtNombreB2.getText(),txtP2.getText()};
 
+    public String lastID_Clients() {
+        ResultSet ladoRS;
+        PreparedStatement ladoPS;
+        String loginQuery = "SELECT MAX(ID_Cliente) from clientes";
+        try {
+            // Preparamos la consulta
+            ladoPS = conexion.prepareStatement(loginQuery);
 
-        for (int i=0; i<requiredFields.length; i++) {
-        if (requiredFields[i].isEmpty()){
-            resultado = new Alert(Alert.AlertType.ERROR, "Hay un campo obligatorio vacío.");
+            // Ejecutamos consulta
+            ladoRS = ladoPS.executeQuery();
+
+            while (ladoRS.next()) {
+                myId = ladoRS.getString(1);
+            }
+            return myId;
+        } catch (SQLException e) {
+            resultado = new Alert(Alert.AlertType.ERROR, "Error en la conexion: " + e.getMessage());
             resultado.show();
-            fieldsBad=true;
-            break;
-        }else{
+            return myId;
+        }
+    }
 
-            if (!txtPrecio.getText().matches("^[0-9]+([,.][0-9]+)?$")) {
-                resultado = new Alert(Alert.AlertType.ERROR, "En el campo Precio hay caracteres que no son numeros enteros o decimales.");
+    private boolean checkObligatories() {
+        boolean fieldsBad = false;
+        String[] requiredFields = new String[]{txtNombre.getText(), txtAP.getText(), txtAM.getText(),
+                txtTelefono.getText(),/*txtPrecio.getText(),*/
+                txtNombreB1.getText(), txtP1.getText(),
+                txtNombreB2.getText(), txtP2.getText()};
+
+
+        for (String requiredField : requiredFields) {
+            if (requiredField.isEmpty()) {
+                resultado = new Alert(Alert.AlertType.ERROR, "Hay un campo obligatorio vacío.");
                 resultado.show();
-                fieldsBad=true;
+                fieldsBad = true;
                 break;
-            }else {
-                fieldsBad=false;
-            }
-            if(cmbFormaPago.getValue().equals("Escoger:")){
-                resultado = new Alert(Alert.AlertType.ERROR, "No se escogió forma de pago.");
-                resultado.show();
-                fieldsBad=true;
-                break;
-            }else{
-                fieldsBad=false;
+            } else {
+
+
+                if (cmbFormaPago.getValue().equals("Escoger:")) {
+                    resultado = new Alert(Alert.AlertType.ERROR, "No se escogió forma de pago.");
+                    resultado.show();
+                    fieldsBad = true;
+                    break;
+                }
+                if (cmbNicho.getValue().equals("Escoger:") || cmbNicho.getValue().toString().isEmpty()) {
+                    resultado = new Alert(Alert.AlertType.ERROR, "No se escogió nicho.");
+                    resultado.show();
+                    fieldsBad = true;
+                    break;
+                }
+                if (cmbLado.getValue().equals("Escoger:")) {
+                    resultado = new Alert(Alert.AlertType.ERROR, "No se escogió lado.");
+                    resultado.show();
+                    fieldsBad = true;
+                    break;
+                }
+                fieldsBad = false;
             }
         }
-        }
 
 
-        if(!txtNumero.getText().isEmpty()){
+        if (!txtNumero.getText().isEmpty()) {
             if (!txtNumero.getText().matches("[0-9]+")) {
                 resultado = new Alert(Alert.AlertType.ERROR, "En el campo número hay caracteres que no son numeros.");
                 resultado.show();
-                fieldsBad=true;
-            }else{
-                fieldsBad=false;
+                fieldsBad = true;
             }
         }
-        if(!txtCP.getText().isEmpty()){
+
+        if (!txtPrecio.getText().isEmpty()) {
+            if (!txtPrecio.getText().matches("[0-9]+")) {
+                resultado = new Alert(Alert.AlertType.ERROR, "En el campo precio hay caracteres que no son numeros.");
+                resultado.show();
+                fieldsBad = true;
+            }
+        }
+        if (!txtCP.getText().isEmpty()) {
             if (!txtCP.getText().matches("[0-9]+")) {
                 resultado = new Alert(Alert.AlertType.ERROR, "En el campo Código Postal hay caracteres que no son numeros.");
                 resultado.show();
-                fieldsBad=true;
-            }else{
-                fieldsBad=false;
+                fieldsBad = true;
             }
 
         }
-        if(dateApertura.getValue() ==null){
+        if (dateApertura.getValue() == null) {
             resultado = new Alert(Alert.AlertType.ERROR, "La fecha apertura esta vacia.");
             resultado.show();
-            fieldsBad=true;
-        }else{
-            fieldsBad=false;
+            fieldsBad = true;
         }
-    return fieldsBad;
+        return fieldsBad;
 
     }
-    public void addClients(){
+
+    private void addClients() {
         //Agregar
         String estado = conectarSQL();
         System.out.println(estado);
         ResultSet clientRS;
         PreparedStatement clientPS;
-        String clientQuery = "INSERT INTO clientes (ID_Nicho,Lado,AP_Paterno,AP_Materno,Nombre,Fecha_Apertura,Fecha_Liquidacion,Calle,Numero,Colonia, Ciudad,Codigo_Postal,Teléfono,Saldo,Ben1,Ben1_Par,Ben2,Ben2_Par,Forma_Pago) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        String clientQuery = "INSERT INTO clientes (ID_Nicho,Lado,AP_Paterno,AP_Materno,Nombre,Fecha_Apertura,Fecha_Liquidacion,Calle,Numero,Colonia, Ciudad,Codigo_Postal,Teléfono,Saldo,Ben1,Ben1_Par,Ben2,Ben2_Par,Forma_Pago,ID_Cliente) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try {
             // Preparamos la consulta
             clientPS = conexion.prepareStatement(clientQuery);
             // Fijamos valores en la consulta con los valores que inserto el usuario.
-            clientPS.setString(1, txtNicho.getText());
-            clientPS.setString(2, "Prueba");
+            clientPS.setString(1, cmbNicho.getValue().toString());
+            if (cmbLado.getValue().toString().equals("Buen Pastor")) {
+                clientPS.setString(2, "Derecho");
+            } else if (cmbLado.getValue().toString().equals("Piedad")) {
+                clientPS.setString(2, "Izquierdo");
+            }
             clientPS.setString(3, txtAP.getText());
             clientPS.setString(4, txtAM.getText());
             clientPS.setString(5, txtNombre.getText());
             clientPS.setString(6, dateApertura.getValue().toString());
-            clientPS.setString(7, dateLiquidacion.getValue().toString());
+            if (dateLiquidacion.getValue() == null) {
+                clientPS.setString(7, nullString);
+            } else {
+                clientPS.setString(7, dateLiquidacion.getValue().toString());
+            }
+
             clientPS.setString(8, txtCalle.getText());
-            clientPS.setString(9, txtNumero.getText());
+            if (txtNumero.getText().isEmpty()) {
+
+                clientPS.setString(9, nullString);
+            } else {
+                clientPS.setString(9, txtNumero.getText());
+            }
             clientPS.setString(10, txtColonia.getText());
             clientPS.setString(11, txtCiudad.getText());
-            clientPS.setString(12, txtCP.getText());
+            if (txtCP.getText().isEmpty()) {
+                clientPS.setString(12, nullString);
+            } else {
+                clientPS.setString(12, txtCP.getText());
+            }
             clientPS.setString(13, txtTelefono.getText());
-            clientPS.setString(14, txtPrecio.getText());
+            if (txtPrecio.getText().isEmpty()) {
+                clientPS.setString(14, nullString);
+            } else {
+                clientPS.setString(14, txtPrecio.getText());
+            }
             clientPS.setString(15, txtNombreB1.getText());
             clientPS.setString(16, txtP1.getText());
             clientPS.setString(17, txtNombreB2.getText());
             clientPS.setString(18, txtP2.getText());
             clientPS.setString(19, cmbFormaPago.getValue().toString());
+            int lastId = (Integer.parseInt(lastID_Clients())) + 1;
+            clientPS.setString(20, lastId + "");
 
             // Ejecutamos consulta
             clientPS.executeQuery();
-            resultado = new Alert(Alert.AlertType.INFORMATION, "Se agregó satisfactoriamente. " );
-            txtNicho.clear();
+            //Manda datos a otra tabla
+
+            ResultSet nichoRS;
+            PreparedStatement nichoPS;
+
+            if (cmbLado.getValue().toString().equals("Buen Pastor")) {
+                ladoCliente = "buen_pastor";
+            } else if (cmbLado.getValue().toString().equals("Piedad")) {
+                ladoCliente = "piedad";
+            }
+            String nichoQuery = "UPDATE " + ladoCliente + " SET ID_Cliente=?,Costo=IFNULL(?,Costo),Estado=?,AP_Pat_Dif=IFNULL(?,AP_Pat_Dif),AP_Mat_Dif=IFNULL(?,AP_Mat_Dif),Nombre_Dif=IFNULL(?,Nombre_Dif) Where ID_Nicho=?";
+
+            try {
+                // Preparamos la consulta
+                nichoPS = conexion.prepareStatement(nichoQuery);
+                // Fijamos valores en la consulta con los valores que inserto el usuario.
+                nichoPS.setString(1, lastID_Clients());
+                if (txtPrecio.getText().isEmpty()) {
+                    nichoPS.setString(2, nullString);
+                } else {
+                    nichoPS.setString(2, txtPrecio.getText());
+                }
+                if (checkDepositado.isSelected()) {
+                    nichoPS.setString(3, "Ocupado");
+                } else {
+                    nichoPS.setString(3, nullString);
+                }
+                if (txtAPD.getText().isEmpty()) {
+                    nichoPS.setString(4, nullString);
+                } else {
+                    nichoPS.setString(4, txtAPD.getText());
+                }
+                if (txtAMD.getText().isEmpty()) {
+                    nichoPS.setString(5, nullString);
+                } else {
+                    nichoPS.setString(5, txtAMD.getText());
+                }
+                if (txtNombreD.getText().isEmpty()) {
+                    nichoPS.setString(6, nullString);
+                } else {
+                    nichoPS.setString(6, txtNombreD.getText());
+                }
+                if (cmbNicho.getValue().toString().isEmpty()) {
+                    nichoPS.setString(7, nullString);
+                } else {
+                    nichoPS.setString(7, cmbNicho.getValue().toString());
+                }
+
+
+                // Ejecutamos consulta
+                nichoPS.executeQuery();
+            } catch (SQLException e) {
+                resultado = new Alert(Alert.AlertType.ERROR, "Error en la conexion: " + e.getMessage());
+                resultado.show();
+
+            }
+            resultado = new Alert(Alert.AlertType.INFORMATION, "Se agregó satisfactoriamente. ");
+            cmbNicho.getSelectionModel().clearSelection();
             txtAP.clear();
             txtAM.clear();
             txtNombre.clear();
@@ -1228,6 +1391,11 @@ public class Controller extends Application {
             resultado.show();
 
         }
+    }
+
+    //Cierra el formulario de agregar/modificar cliente
+    public void Cancel() {
+        clickClientes();
     }
 }
 

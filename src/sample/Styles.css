@@ -1,10 +1,11 @@
 .background{
     -fx-background-color: #ffffff;
 	-fx-font-family:"Arial";
+
 }
 .background_vbox{
 -fx-background-color: rgb(51, 165, 247,.5);
- -fx-background-radius: 10;
+ -fx-background-radius: 20
 }
 .background_login{
 	 -fx-background-image: url("1.jpg");
@@ -18,7 +19,8 @@
 .button{
 	-fx-background-color:#4cb4ff;
 	-fx-text-fill: #ffffff;
-	-fx-font-size: 13 px;
+	-fx-font-size: 14 px;
+
 }
 .button:hover{
 	
@@ -57,6 +59,7 @@
 	//-fx-background-color:#c3d1db;
 	//-fx-text-fill: #FFFFFF;
 }
+//disponibilidad
 .buttonused{
 	-fx-background-color:#d14127;
 	-fx-text-fill: #FFFFFF;
@@ -70,13 +73,18 @@
 	-fx-text-fill: #dd882c;
 
 }
+//formulario
 .table_label{
 	-fx-font-size: 26;
 
 }
 .form_label{
 	-fx-font-size: 16;
-
+	
+}
+.form_label_login{
+	-fx-font-size: 16;
+	-fx-background-radius: 5em;
 }
 .label_info{
 	-fx-font-size: 14;
@@ -100,4 +108,14 @@
 }
 .botonvis:pressed {
 	-fx-background-color:#328235;
+}
+.buttonlogin{
+	-fx-background-color:#4ace4e;
+	-fx-font-size: 16;
+	-fx-text-fill: #FFFFFF;
+	-fx-background-radius: 5em;
+}
+.buttonlogin:hover{
+	
+    -fx-background-color:#2ca32f;
 }

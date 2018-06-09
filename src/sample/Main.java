@@ -12,7 +12,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("login.fxml"));
         primaryStage.setTitle("Criptas");
-        primaryStage.setScene(new Scene(root, 800, 700));
+        primaryStage.setScene(new Scene(root, 1280, 700));
         primaryStage.show();
       primaryStage.getIcons().add(new Image("Imgs/icon.png"));
 
