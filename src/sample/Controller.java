@@ -27,8 +27,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class Controller extends Application {
@@ -41,6 +44,7 @@ public class Controller extends Application {
     private String[] numb = new String[196];
     private String[] t = new String[200];
     private String nombre;
+    String id_obt, ladoobt, estado;
     static String currentTable;
     private String currentId, myId;
     private String tableinTab, status, type;
@@ -70,7 +74,7 @@ public class Controller extends Application {
     @FXML
     private TextField txtNombre, txtAP, txtAM, txtCalle, txtNumero, txtColonia, txtCiudad, txtCP, txtTelefono, txtPrecio, txtNombreB1, txtP1, txtNombreB2, txtP2, txtNombreD, txtAPD, txtAMD;
     @FXML
-    ComboBox cmbFormaPago, cmbLado,cmbNicho;
+    ComboBox cmbFormaPago, cmbLado, cmbNicho;
     @FXML
     private CheckBox checkDepositado;
     String ladoCliente;
@@ -877,36 +881,61 @@ public class Controller extends Application {
                 clientData.clear();
                 try {
                     while (clients.next()) {
-                        clientData.add(clients.getString("Nombre"));
-                        clientData.add(clients.getString("AP_Paterno"));
-                        clientData.add(clients.getString("AP_Materno"));
-                        clientData.add(clients.getString("ID_Nicho"));
-                        clientData.add(clients.getString("Lado"));
-                        clientData.add(clients.getString("Saldo"));
-                        clientData.add(clients.getString("Dirección"));
-                        clientData.add(clients.getString("Teléfono"));
-                        clientData.add(clients.getString("Fecha_Ins"));
-                        clientData.add(clients.getString("Ben1"));
-                        clientData.add(clients.getString("Ben1_Par"));
-                        clientData.add(clients.getString("Ben2"));
-                        clientData.add(clients.getString("Ben2_Par"));
-                        clientData.add(clients.getString("Forma_Pago"));
+                        txtNombre.setText(clients.getString("Nombre"));
+                        txtAP.setText(clients.getString("AP_Paterno"));
+                        txtAM.setText(clients.getString("AP_Materno"));
+                        id_obt = clients.getString("ID_Nicho");
+                        ladoobt = clients.getString("Lado");
+                        if (clients.getString("Lado").equals("Izquierdo")) {
+                            cmbLado.setValue("Buen Pastor");
+                        } else if (clients.getString("Lado").equals("Derecho")) {
+                            cmbLado.setValue("Piedad");
+                        }
+                        cmbNicho.setValue(clients.getString("ID_Nicho"));
+                        // clientData.add(clients.getString("Saldo"));
+                        txtCalle.setText(clients.getString("Calle"));
+                        txtNumero.setText(clients.getString("Numero"));
+                        txtColonia.setText(clients.getString("Colonia"));
+                        txtCiudad.setText(clients.getString("Ciudad"));
+                        txtCP.setText(clients.getString("Codigo_Postal"));
+                        txtTelefono.setText(clients.getString("Teléfono"));
+                        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//                        dateApertura.setValue(LocalDate.parse(clients.getString("Fecha_Apertura"),dateFormatter));
+                        if (clients.getString("Fecha_Apertura") != null) {
+                            dateApertura.setValue(LocalDate.parse(clients.getString("Fecha_Apertura"), dateFormatter));
+                        }
+                        if (clients.getString("Fecha_Liquidacion") != null) {
+                            dateLiquidacion.setValue(LocalDate.parse(clients.getString("Fecha_Liquidacion"), dateFormatter));
+                        }
+
+                        txtNombreB1.setText(clients.getString("Ben1"));
+                        txtP1.setText(clients.getString("Ben1_Par"));
+                        txtNombreB2.setText(clients.getString("Ben2"));
+                        txtP2.setText(clients.getString("Ben2_Par"));
+                        cmbFormaPago.setValue(clients.getString("Forma_Pago"));
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
                 String lado;
-                if (clientData.get(4).equals("Derecho"))
+                if (ladoobt.equals("Derecho"))
                     lado = "piedad";
                 else
                     lado = "buen_pastor";
-                String queryDif = "SELECT * FROM " + lado + " WHERE ID_Nicho='" + clientData.get(3) + "'";
+
+                String queryDif = "SELECT * FROM " + lado + " WHERE ID_Nicho='" + id_obt + "'";
                 ResultSet dif = objConexion.consultar(queryDif);
                 try {
                     while (dif.next()) {
-                        clientData.add(dif.getString("Nombre_Dif"));
-                        clientData.add(dif.getString("AP_Pat_Dif"));
-                        clientData.add(dif.getString("AP_Mat_Dif"));
+                        txtNombreD.setText(dif.getString("Nombre_Dif"));
+                        txtAPD.setText(dif.getString("AP_Pat_Dif"));
+                        txtAMD.setText(dif.getString("AP_Mat_Dif"));
+                        estado = dif.getString("Estado");
+
+                        txtPrecio.setText(dif.getString("Costo"));
+                    }
+                    if (Objects.equals(estado, "Ocupado")) {
+                        checkDepositado.setSelected(true);
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -1025,13 +1054,25 @@ public class Controller extends Application {
         if (isSelected()) {
             switch (currentTable) {
                 case "Clientes": {
+
+//                    optionalEntries = new String[]{"Beneficicario 2", "Parentesco de Beneficiario 2", "Limite de Credito"};
+//                    requiredEntries = new String[]{"Nombre", "Apellido Paterno", "Apellido Materno", "Nicho", "Lado", "Saldo", "Dirección", "Telefono", "Fecha de Inscripcion", "Benficiario 1", "Parentesco de Beneficiario 1"};
+//                    otherTableEntries = new String[]{"Nombre del Difunto", "Apellido Paterno del Difunto", "Apellido Materno del Difunto"};
+//                    ModScreen modify = new ModScreen(requiredEntries, optionalEntries, otherTableEntries, 17, currentTable, objConexion, getID() + "");
+//                    Node source = (Node) ev.getSource();
+//                    ((Stage) source.getScene().getWindow()).setScene(modify.makeScene());
+                    ObservableList formas = FXCollections.observableArrayList(
+                            "a 4 meses", "a 20 meses", "a Contado");
+                    ObservableList lados = FXCollections.observableArrayList(
+                            "Buen Pastor", "Piedad");
+                    btnAdd.setDisable(true);
+                    btnMod.setDisable(true);
+                    btnDel.setDisable(true);
+                    btnImp.setDisable(true);
+                    cmbFormaPago.setItems(formas);
+                    cmbLado.setItems(lados);
                     getClientInfoTable();
-                    optionalEntries = new String[]{"Beneficicario 2", "Parentesco de Beneficiario 2", "Limite de Credito"};
-                    requiredEntries = new String[]{"Nombre", "Apellido Paterno", "Apellido Materno", "Nicho", "Lado", "Saldo", "Dirección", "Telefono", "Fecha de Inscripcion", "Benficiario 1", "Parentesco de Beneficiario 1"};
-                    otherTableEntries = new String[]{"Nombre del Difunto", "Apellido Paterno del Difunto", "Apellido Materno del Difunto"};
-                    ModScreen modify = new ModScreen(requiredEntries, optionalEntries, otherTableEntries, 17, currentTable, objConexion, getID() + "");
-                    Node source = (Node) ev.getSource();
-                    ((Stage) source.getScene().getWindow()).setScene(modify.makeScene());
+                    tabPaneM.getSelectionModel().select(tabForm);
                     break;
                 }
                 case "Pagos": {
@@ -1092,62 +1133,65 @@ public class Controller extends Application {
         dialog.showAndWait();
 
     }
-    public void sideSelected(){
+
+    public void sideSelected() {
         conectarSQL();
         cmbNicho.getItems().clear();
         ResultSet nichosRS;
         PreparedStatement nichosPS;
         List<String> results = new ArrayList<String>();
         results.clear();
-        if(cmbLado.getValue().toString().equals("Buen Pastor")){
+
+        if (cmbLado.getValue().toString().equals("Buen Pastor")) {
             cmbNicho.setValue("");
             cmbNicho.setDisable(false);
-          String nichosQuery = "SELECT ID_Nicho from Buen_Pastor";
-          try {
-              // Preparamos la consulta
-              nichosPS = conexion.prepareStatement(nichosQuery);
+            String nichosQuery = "SELECT ID_Nicho from Buen_Pastor";
+            try {
+                // Preparamos la consulta
+                nichosPS = conexion.prepareStatement(nichosQuery);
 
-              // Ejecutamos consulta
-              nichosRS = nichosPS.executeQuery();
+                // Ejecutamos consulta
+                nichosRS = nichosPS.executeQuery();
 
-              while (nichosRS.next()) {
-                  results.add(nichosRS.getString("ID_Nicho"));
-              }
-              ObservableList nichos = FXCollections.observableArrayList(
-                      results);
-              cmbNicho.setItems(nichos);
-              new AutoCompleteComboBoxListener<>(cmbNicho);
-      } catch (SQLException e) {
-              resultado = new Alert(Alert.AlertType.ERROR, "Error en la conexion: " + e.getMessage());
-              resultado.show();
+                while (nichosRS.next()) {
+                    results.add(nichosRS.getString("ID_Nicho"));
+                }
+                ObservableList nichos = FXCollections.observableArrayList(
+                        results);
+                cmbNicho.setItems(nichos);
+                new AutoCompleteComboBoxListener<>(cmbNicho);
+            } catch (SQLException e) {
+                resultado = new Alert(Alert.AlertType.ERROR, "Error en la conexion: " + e.getMessage());
+                resultado.show();
 
-          }
+            }
         }
-      if(cmbLado.getValue().toString().equals("Piedad")){
-          cmbNicho.setValue("");
-          cmbNicho.setDisable(false);
-          String nichosQuery = "SELECT ID_Nicho from Piedad";
-          try {
-              // Preparamos la consulta
-              nichosPS = conexion.prepareStatement(nichosQuery);
+        if (cmbLado.getValue().toString().equals("Piedad")) {
+            cmbNicho.setValue("");
+            cmbNicho.setDisable(false);
+            String nichosQuery = "SELECT ID_Nicho from Piedad";
+            try {
+                // Preparamos la consulta
+                nichosPS = conexion.prepareStatement(nichosQuery);
 
-              // Ejecutamos consulta
-              nichosRS = nichosPS.executeQuery();
+                // Ejecutamos consulta
+                nichosRS = nichosPS.executeQuery();
 
-              while (nichosRS.next()) {
-                  results.add(nichosRS.getString("ID_Nicho"));
-              }
-              ObservableList nichos = FXCollections.observableArrayList(
-                      results);
-              cmbNicho.setItems(nichos);
-              new AutoCompleteComboBoxListener<>(cmbNicho);
-          } catch (SQLException e) {
-              resultado = new Alert(Alert.AlertType.ERROR, "Error en la conexion: " + e.getMessage());
-              resultado.show();
+                while (nichosRS.next()) {
+                    results.add(nichosRS.getString("ID_Nicho"));
+                }
+                ObservableList nichos = FXCollections.observableArrayList(
+                        results);
+                cmbNicho.setItems(nichos);
+                new AutoCompleteComboBoxListener<>(cmbNicho);
+            } catch (SQLException e) {
+                resultado = new Alert(Alert.AlertType.ERROR, "Error en la conexion: " + e.getMessage());
+                resultado.show();
 
-          }
-      }
+            }
+        }
     }
+
     //Agregar cliente
     public void addClient() {
         if (!checkObligatories()) {
@@ -1263,9 +1307,9 @@ public class Controller extends Application {
             // Fijamos valores en la consulta con los valores que inserto el usuario.
             clientPS.setString(1, cmbNicho.getValue().toString());
             if (cmbLado.getValue().toString().equals("Buen Pastor")) {
-                clientPS.setString(2, "Derecho");
-            } else if (cmbLado.getValue().toString().equals("Piedad")) {
                 clientPS.setString(2, "Izquierdo");
+            } else if (cmbLado.getValue().toString().equals("Piedad")) {
+                clientPS.setString(2, "Derecho");
             }
             clientPS.setString(3, txtAP.getText());
             clientPS.setString(4, txtAM.getText());
@@ -1364,24 +1408,7 @@ public class Controller extends Application {
 
             }
             resultado = new Alert(Alert.AlertType.INFORMATION, "Se agregó satisfactoriamente. ");
-            cmbNicho.getSelectionModel().clearSelection();
-            txtAP.clear();
-            txtAM.clear();
-            txtNombre.clear();
-            dateApertura.setValue(null);
-            dateLiquidacion.setValue(null);
-            txtCalle.clear();
-            txtNumero.clear();
-            txtColonia.clear();
-            txtCiudad.clear();
-            txtCP.clear();
-            txtTelefono.clear();
-            txtPrecio.clear();
-            txtNombreB1.clear();
-            txtP1.clear();
-            txtNombreB2.clear();
-            txtP2.clear();
-            cmbFormaPago.getSelectionModel().clearSelection();
+            clearForm();
             resultado.show();
             //Limpiar
 
@@ -1396,6 +1423,29 @@ public class Controller extends Application {
     //Cierra el formulario de agregar/modificar cliente
     public void Cancel() {
         clickClientes();
+        clearForm();
+    }
+
+    private void clearForm() {
+        cmbNicho.getSelectionModel().clearSelection();
+        cmbLado.getSelectionModel().clearSelection();
+        txtAP.clear();
+        txtAM.clear();
+        txtNombre.clear();
+        dateApertura.setValue(null);
+        dateLiquidacion.setValue(null);
+        txtCalle.clear();
+        txtNumero.clear();
+        txtColonia.clear();
+        txtCiudad.clear();
+        txtCP.clear();
+        txtTelefono.clear();
+        txtPrecio.clear();
+        txtNombreB1.clear();
+        txtP1.clear();
+        txtNombreB2.clear();
+        txtP2.clear();
+        cmbFormaPago.getSelectionModel().clearSelection();
     }
 }
 

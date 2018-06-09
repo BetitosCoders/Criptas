@@ -262,7 +262,7 @@
                                           <Insets bottom="5.0" />
                                        </VBox.margin>
                                     </Label>
-                                    <ComboBox fx:id="cmbFormaPago" prefWidth="305.0" promptText="Escoger:" styleClass="form_label" />
+                                    <ComboBox fx:id="cmbFormaPago" onMouseClicked="#sideSelected" prefWidth="305.0" promptText="Escoger:" styleClass="form_label" />
                                  </children>
                                  <padding>
                                     <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
@@ -454,7 +454,7 @@
                                           <Insets bottom="5.0" />
                                        </VBox.margin>
                                     </Label>
-                                    <ComboBox fx:id="cmbLado" onAction="#sideSelected" prefWidth="305.0" promptText="Selecionar lado:" styleClass="form_label" />
+                                    <ComboBox fx:id="cmbLado" prefWidth="305.0" promptText="Selecionar lado:" styleClass="form_label" />
                                  </children>
                               </VBox>
                               <BorderPane GridPane.columnIndex="2" GridPane.rowIndex="9" />
