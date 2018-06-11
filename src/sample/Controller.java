@@ -44,7 +44,7 @@ public class Controller extends Application {
     private String[] numb = new String[196];
     private String[] t = new String[200];
     private String nombre;
-    String id_obt, ladoobt, estado;
+    private String id_obt, ladoobt, estado;
     static String currentTable;
     private String currentId, myId;
     private String tableinTab, status, type;
@@ -77,8 +77,9 @@ public class Controller extends Application {
     ComboBox cmbFormaPago, cmbLado, cmbNicho;
     @FXML
     private CheckBox checkDepositado;
-    String ladoCliente;
-    String nullString = null;
+    private String ladoCliente;
+    private String nullString = null;
+    private boolean modify=false;
 
     @FXML
     private DatePicker dateApertura, dateLiquidacion;
@@ -507,8 +508,11 @@ public class Controller extends Application {
                     btnDel.setDisable(true);
                     btnImp.setDisable(true);
                     cmbFormaPago.setItems(formas);
-                    cmbLado.setItems(lados);
+                    if(!cmbLado.getItems().equals(lados)){
+                        cmbLado.setItems(lados);
+                    }
                     tabPaneM.getSelectionModel().select(tabForm);
+                    modify=false;
                     break;
                 }
                 case "Pagos": {
@@ -886,9 +890,18 @@ public class Controller extends Application {
                         txtAM.setText(clients.getString("AP_Materno"));
                         id_obt = clients.getString("ID_Nicho");
                         ladoobt = clients.getString("Lado");
+                        ObservableList lados = FXCollections.observableArrayList(
+                                "Buen Pastor", "Piedad");
                         if (clients.getString("Lado").equals("Izquierdo")) {
+                            if(!cmbLado.getItems().equals(lados)){
+                                cmbLado.setItems(lados);
+                            }
                             cmbLado.setValue("Buen Pastor");
                         } else if (clients.getString("Lado").equals("Derecho")) {
+                            if(!cmbLado.getItems().equals(lados)){
+                                cmbLado.setItems(lados);
+                            }
+
                             cmbLado.setValue("Piedad");
                         }
                         cmbNicho.setValue(clients.getString("ID_Nicho"));
@@ -1061,16 +1074,15 @@ public class Controller extends Application {
 //                    ModScreen modify = new ModScreen(requiredEntries, optionalEntries, otherTableEntries, 17, currentTable, objConexion, getID() + "");
 //                    Node source = (Node) ev.getSource();
 //                    ((Stage) source.getScene().getWindow()).setScene(modify.makeScene());
+                    modify=true;
                     ObservableList formas = FXCollections.observableArrayList(
                             "a 4 meses", "a 20 meses", "a Contado");
-                    ObservableList lados = FXCollections.observableArrayList(
-                            "Buen Pastor", "Piedad");
+
                     btnAdd.setDisable(true);
                     btnMod.setDisable(true);
                     btnDel.setDisable(true);
                     btnImp.setDisable(true);
                     cmbFormaPago.setItems(formas);
-                    cmbLado.setItems(lados);
                     getClientInfoTable();
                     tabPaneM.getSelectionModel().select(tabForm);
                     break;
@@ -1136,7 +1148,7 @@ public class Controller extends Application {
 
     public void sideSelected() {
         conectarSQL();
-        cmbNicho.getItems().clear();
+       // cmbNicho.getItems().clear();
         ResultSet nichosRS;
         PreparedStatement nichosPS;
         List<String> results = new ArrayList<String>();
@@ -1270,7 +1282,7 @@ public class Controller extends Application {
         }
 
         if (!txtPrecio.getText().isEmpty()) {
-            if (!txtPrecio.getText().matches("[0-9]+")) {
+            if (!txtPrecio.getText().matches("^[0-9]+([,.][0-9]+)?$")) {
                 resultado = new Alert(Alert.AlertType.ERROR, "En el campo precio hay caracteres que no son numeros.");
                 resultado.show();
                 fieldsBad = true;
@@ -1297,9 +1309,14 @@ public class Controller extends Application {
         //Agregar
         String estado = conectarSQL();
         System.out.println(estado);
-        ResultSet clientRS;
+        String clientQuery;
         PreparedStatement clientPS;
-        String clientQuery = "INSERT INTO clientes (ID_Nicho,Lado,AP_Paterno,AP_Materno,Nombre,Fecha_Apertura,Fecha_Liquidacion,Calle,Numero,Colonia, Ciudad,Codigo_Postal,Teléfono,Saldo,Ben1,Ben1_Par,Ben2,Ben2_Par,Forma_Pago,ID_Cliente) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        if(modify){
+            clientQuery = "UPDATE clientes SET ID_Nicho=IFNULL(?,ID_Nicho),Lado=IFNULL(?,Lado),AP_Paterno=IFNULL(?,AP_Paterno),AP_Materno=IFNULL(?,AP_Materno),Nombre=IFNULL(?,Nombre),Fecha_Apertura=IFNULL(?,Fecha_Apertura),Fecha_Liquidacion=IFNULL(?,Fecha_Liquidacion),Calle=IFNULL(?,Calle),Numero=IFNULL(?,Numero),Colonia=IFNULL(?,Colonia), Ciudad=IFNULL(?,Ciudad),Codigo_Postal=IFNULL(?,Codigo_Postal),Teléfono=IFNULL(?,Teléfono),Saldo=IFNULL(?,Saldo),Ben1=IFNULL(?,Ben1),Ben1_Par=IFNULL(?,Ben1_Par),Ben2=IFNULL(?,Ben2),Ben2_Par=IFNULL(?,Ben2_Par),Forma_Pago=IFNULL(?,Forma_Pago) Where ID_Cliente=?";
+
+        }else{
+            clientQuery = "INSERT INTO clientes (ID_Nicho,Lado,AP_Paterno,AP_Materno,Nombre,Fecha_Apertura,Fecha_Liquidacion,Calle,Numero,Colonia, Ciudad,Codigo_Postal,Teléfono,Saldo,Ben1,Ben1_Par,Ben2,Ben2_Par,Forma_Pago,ID_Cliente) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        }
 
         try {
             // Preparamos la consulta
@@ -1347,7 +1364,11 @@ public class Controller extends Application {
             clientPS.setString(18, txtP2.getText());
             clientPS.setString(19, cmbFormaPago.getValue().toString());
             int lastId = (Integer.parseInt(lastID_Clients())) + 1;
-            clientPS.setString(20, lastId + "");
+           if(modify){
+               clientPS.setString(20, getID()+"");
+           }else{
+               clientPS.setString(20, lastId + "");
+           }
 
             // Ejecutamos consulta
             clientPS.executeQuery();
@@ -1427,8 +1448,8 @@ public class Controller extends Application {
     }
 
     private void clearForm() {
-        cmbNicho.getSelectionModel().clearSelection();
-        cmbLado.getSelectionModel().clearSelection();
+     //   cmbNicho.getSelectionModel().clearSelection();
+      //  cmbLado.getSelectionModel().clearSelection();
         txtAP.clear();
         txtAM.clear();
         txtNombre.clear();

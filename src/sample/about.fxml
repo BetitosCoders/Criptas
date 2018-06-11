@@ -7,7 +7,7 @@
 <?import javafx.scene.text.Text?>
 
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="291.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="291.0" prefWidth="600.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
    <children>
       <ImageView fitHeight="98.0" fitWidth="559.0" layoutX="23.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
          <image>
