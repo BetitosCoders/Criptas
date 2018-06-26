@@ -20,6 +20,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
+import net.sf.jasperreports.components.map.Item;
 import net.sf.jasperreports.engine.JRException;
 
 import java.io.File;
@@ -51,6 +52,11 @@ public class Controller extends Application {
     static File doc;
     static List<String> clientData;
     static String docPath = null;
+    private final Button[] button = new Button[200];
+    static boolean piedad = false;
+    static String clickedNicho;
+    private static String btext;
+
     @FXML
     TableView tabledata;
     @FXML
@@ -235,6 +241,7 @@ public class Controller extends Application {
         callProcedure("{call showpiedad()}");
         btnDispBP.setVisible(false);
         btnDispP.setVisible(false);
+        piedad = true;
     }
 
     public void clickBuenPastor() {
@@ -249,6 +256,7 @@ public class Controller extends Application {
         callProcedure("{call showBuenPastor()}");
         btnDispBP.setVisible(false);
         btnDispP.setVisible(false);
+        piedad = false;
     }
 
     public void clickPagos() {
@@ -346,6 +354,22 @@ public class Controller extends Application {
         addCol(_tableRS);
         // Agregamos Registros a una lista.
         addList(_tableRS);
+
+        tabledata.setRowFactory(tv -> {
+            TableRow<Item> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+                    String selection = tabledata.getSelectionModel().getSelectedItems().get(0).toString();
+                    selection = selection.replace('[', ' ').trim();
+                    String splitSelection[] = selection.split(",");
+                    clickedNicho = splitSelection[0];
+                    Node source = (Node) event.getSource();
+                    switchScene("details.fxml", source);
+                }
+            });
+            return row ;
+        });
+
         // Agregamos lista de registros a nuestra tabla.
         tabledata.setColumnResizePolicy(new Callback<TableView.ResizeFeatures, Boolean>() {
             @Override
@@ -639,7 +663,7 @@ public class Controller extends Application {
         Button b = null;
         if (o instanceof Button) b = (Button) o;
         if (b != null) {
-            String btext = b.getText();
+            btext = b.getText();
             //TabPaneM.getSelectionModel().select(tabTabla);
             int x = 0;
             for (int i = 0; i < numb.length; i++) {
@@ -659,8 +683,6 @@ public class Controller extends Application {
                         tabledata.getSelectionModel().select(x);
                         tabPaneM.getSelectionModel().select(tabTabla);
                         tabledata.scrollTo(x);
-
-
                     }
                 }
             }
@@ -675,7 +697,6 @@ public class Controller extends Application {
         String[] t = new String[200];
         String[] typear = new String[200];
         int cont = 0;
-        Button[] button = new Button[200];
         //Espacio entre los botones
         gridDisp.setPadding(new Insets(5));
         gridDisp.setHgap(5);
@@ -761,6 +782,9 @@ public class Controller extends Application {
                 //Crea el botón
                 button[number] = new Button(t[number]);
                 numb[number] = t[number];
+                button[number].setOnAction(actionEvent -> {
+
+                });
                 switch (typear[number]) {
                     //Si es imagen el tipo le añade el estilo buttonbold
                     case "Imagen":
